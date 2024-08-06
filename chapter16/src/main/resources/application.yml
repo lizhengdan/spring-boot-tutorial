@@ -1,0 +1,13 @@
+spring:
+  mail:
+    host: smtp.126.com
+    username: 123456@126.com
+    password: xxxx
+    properties:
+      mail:
+        smtp:
+          auth: true
+  freemarker:
+    template-loader-path: classpath:/templates/
+  thymeleaf:
+    prefix: classpath:/templates/

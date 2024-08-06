@@ -1,0 +1,25 @@
+#kafka配置
+spring:
+  kafka:
+    bootstrap-servers: 49.235.247.175:9092
+    # 生产者配置
+    producer:
+      # 发送失败重试次数
+      retries: 0
+      # 积累消息数量达到 batch-size，批量发送
+      batch-size: 16384
+      # 积累消息缓存大小达到 buffer-memory，批量发送
+      buffer-memory: 33554432
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    # 消费者配置
+    consumer:
+      # 默认消费者组
+      group-id: test-group
+      # 如果没有 offset，从 topic 什么位置进行消费
+      auto-offset-reset: earliest
+      # 自动提交
+      enable-auto-commit: true
+      auto-commit-interval: 100
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer

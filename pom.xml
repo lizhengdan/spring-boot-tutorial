@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.mhkj.course</groupId>
+    <artifactId>spring-boot-tutorial</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.0.5.RELEASE</version>
+    </parent>
+
+    <modules>
+        <module>chapter1</module>
+        <module>chapter2</module>
+        <module>chapter3</module>
+        <module>chapter4</module>
+        <module>chapter5</module>
+        <module>chapter6</module>
+        <module>chapter7</module>
+        <module>chapter8</module>
+        <module>chapter9</module>
+        <module>chapter10</module>
+        <module>chapter11</module>
+        <module>chapter12</module>
+        <module>chapter13</module>
+        <module>chapter14</module>
+        <module>chapter15</module>
+        <module>chapter16</module>
+        <module>chapter17</module>
+        <module>chapter18</module>
+        <module>chapter20</module>
+        <module>chapter21</module>
+        <module>chapter22</module>
+        <module>chapter23</module>
+        <module>chapter24</module>
+        <module>chapter25</module>
+        <module>chapter26</module>
+        <module>chapter27</module>
+        <module>chapter28</module>
+        <module>chapter29</module>
+        <module>chapter30</module>
+        <module>chapter31</module>
+        <module>chapter32</module>
+        <module>chapter33</module>
+        <module>chapter34</module>
+        <module>chapter35</module>
+        <module>chapter36</module>
+        <module>chapter37</module>
+    </modules>
+
+</project>
