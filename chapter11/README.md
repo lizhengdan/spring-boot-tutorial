@@ -1,27 +1,33 @@
 整合Swagger2自动生成API文档
----
+---------------------------
 
 ### 相关知识
+
 Swagger 是一个规范和完整的框架，用于生成、描述、调用和可视化 RESTful 风格的 Web 服务。
 
-Swagger官网：<https://swagger.io>
+Swagger官网：[https://swagger.io](https://swagger.io)
 
-#### 常用注解： 
- - @Api 用于类，表示标识这个类是swagger的资源
- - @ApiOperation 用于方法，表示一个http请求的操作
- - @ApiParam 用于方法，参数，字段说明，表示对参数的添加元数据（说明或是否必填等）
- - @ApiModel 用于类，表示对类进行说明，用于参数用实体类接收
- - @ApiModelProperty 用于方法，字段，表示对model属性的说明或者数据操作更改
- - @ApiIgnore 用于类，方法，方法参数，表示这个方法或者类被忽略
- - @ApiImplicitParam 用于方法，表示单独的请求参数
- - @ApiImplicitParams 用于方法，包含多个 @ApiImplicitParam
+#### 常用注解：
+
+- @Api 用于类，表示标识这个类是swagger的资源
+- @ApiOperation 用于方法，表示一个http请求的操作
+- @ApiParam 用于方法，参数，字段说明，表示对参数的添加元数据（说明或是否必填等）
+- @ApiModel 用于类，表示对类进行说明，用于参数用实体类接收
+- @ApiModelProperty 用于方法，字段，表示对model属性的说明或者数据操作更改
+- @ApiIgnore 用于类，方法，方法参数，表示这个方法或者类被忽略
+- @ApiImplicitParam 用于方法，表示单独的请求参数
+- @ApiImplicitParams 用于方法，包含多个 @ApiImplicitParam
 
 ### 目标
+
 整合 Swagger2 实现自动生成接口文档
 
 ### 操作步骤
+
 #### 添加依赖
+
 引入 Spring Boot Starter 父工程
+
 ```xml
 <parent>
     <groupId>org.springframework.boot</groupId>
@@ -31,6 +37,7 @@ Swagger官网：<https://swagger.io>
 ```
 
 添加 `Swagger2` 的依赖
+
 ```xml
 <dependency>
     <groupId>io.springfox</groupId>
@@ -45,6 +52,7 @@ Swagger官网：<https://swagger.io>
 ```
 
 整体依赖如下
+
 ```xml
 <dependencies>
     <dependency>
@@ -90,6 +98,7 @@ Swagger官网：<https://swagger.io>
 ```
 
 #### 注册 Swagger2
+
 ```java
 /**
  * @Configuration 用于启动自动加载
@@ -133,6 +142,7 @@ public class SwaggerAutoConfiguration {
 ```
 
 #### 编码
+
 1. Controller 层代码
 
 为接口添加 Swagger 注解
@@ -175,10 +185,9 @@ public class UserBO {
 
 访问 http:://localhost:8080/swagger-ui.html，即可看到 API 文档
 
-
 ### 源码地址
 
-本章源码 : <https://gitee.com/gongm_24/spring-boot-tutorial.git>
+本章源码 : [https://github.com/lizhengdan/spring-boot-tutorial.git](https://github.com/lizhengdan/spring-boot-tutorial.git)
 
 ### 结束语
 

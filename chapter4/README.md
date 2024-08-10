@@ -1,16 +1,18 @@
 配置拦截器
----
+----------
 
 ### 相关知识
 
-关于拦截器的相关知识可参考：<https://jinnianshilongnian.iteye.com/blog/1670856>
+关于拦截器的相关知识可参考：[https://jinnianshilongnian.iteye.com/blog/1670856](https://jinnianshilongnian.iteye.com/blog/1670856)
 
 ### 目标
 
 学会在 SpringBoot 的项目中怎么配置拦截器
 
 ### 操作步骤
+
 #### 添加依赖
+
 引入 Spring Boot Starter 父工程
 
 ```xml
@@ -22,6 +24,7 @@
 ```
 
 整体依赖如下所示
+
 ```xml
 <dependencies>
     <dependency>
@@ -38,7 +41,9 @@
 ```
 
 #### 编码
+
 1. 编写拦截器
+
 ```java
 public class TraceInterceptor implements HandlerInterceptor {
 
@@ -84,6 +89,7 @@ public class TraceInterceptor implements HandlerInterceptor {
 
 WebMvcConfigurer 接口提供了对 SpringMVC 的个性化配置。
 实现 WebMvcConfigurer 接口的 addInterceptors 方法进行拦截器的注册。
+
 ```java
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
@@ -102,6 +108,7 @@ public class WebConfig implements WebMvcConfigurer {
 ```
 
 3. Controller 层代码
+
 ```java
 @RestController
 public class HelloController {
@@ -115,6 +122,7 @@ public class HelloController {
 ```
 
 4. 启动类
+
 ```java
 @SpringBootApplication
 public class Application {
@@ -127,7 +135,9 @@ public class Application {
 ```
 
 ### 验证结果
+
 编写测试用例
+
 ```java
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
@@ -161,7 +171,7 @@ public class TraceInterceptorTest {
 
 ### 源码地址
 
-本章源码 : <https://gitee.com/gongm_24/spring-boot-tutorial.git>
+本章源码 : [https://github.com/lizhengdan/spring-boot-tutorial.git](https://github.com/lizhengdan/spring-boot-tutorial.git)
 
 ### 结束语
 

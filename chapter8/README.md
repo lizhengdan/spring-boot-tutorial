@@ -1,52 +1,58 @@
 整合hibernate-validator优雅表单校验
----
+-----------------------------------
 
 ### 相关知识
+
 `spring-boot-starter-web` 项目中默认已经集成了 `hibernate-validator`
+
 #### 常用注解
 
 > JSR 303 Bean Validation
 
-注解|说明|数据类型
----|---|---
-AssertTrue|标注元素必须为true|Boolean
-AssertFalse|标注元素必须为false|Boolean
-DecimalMax(value,isclusive)|标注元素必须小于等于指定值|BigDecimal,BigInteger, CharSequence,byte,short, int, long,Byte,Short, Integer,Long
-DecimalMin(value,isclusive)|标注元素必须大于等于指定值|BigDecimal,BigInteger, CharSequence,byte,short, int, long,Byte,Short, Integer,Long
-Digits(integer,fraction)|标注元素必须位于指定位数之内|BigDecimal,BigInteger, CharSequence,byte,short, int, long,Byte,Short, Integer,Long
-Email(regexp,flags)|标注元素必须为格式正确的邮件地址|CharSequence
-Future|标注元素必须为将来的日期|Date,Calendar,Instant, LocalDate,LocalDateTime, LocalTime,MonthDay, OffsetDateTime,OffsetTime, Year,YearMonth, ZonedDateTime,HijrahDate, JapaneseDate,MinguoDate, ThaiBuddhistDate
-FutureOrPresent|标注元素必须为现在或将来的日期|同Future
-Max(value)|标注元素必须小于等于指定值|BigDecimal,BigInteger, CharSequence,byte,short, int, long,Byte,Short, Integer,Long
-Min(value)|标注元素必须大于等于指定值|BigDecimal,BigInteger, CharSequence,byte,short, int, long,Byte,Short, Integer,Long
-Negative|标注元素必须为严格负值|BigDecimal,BigInteger, CharSequence,byte,short, int, long,Byte,Short, Integer,Long
-NegativeOrZero|标注元素必须为严格的负值或者0值|BigDecimal,BigInteger, CharSequence,byte,short, int, long,Byte,Short, Integer,Long
-NotBlank|标注元素必须不为null，且必须包含至少一个非空字符|CharSequence
-NotEmpty|标注元素必须不为null，且必须包含至少一个子元素|CharSequence,Collection,Map,Array
-NotNull|标注元素必须不为null|all
-Null|标注元素必须为null|all
-Past|标注元素必须为过去的日期|同Future
-PastOrPresent|标注元素必须为过去的或者现在的日期|同Future
-Pattern(regexp,flags)|标注元素必须匹配给定的正则表达式|CharSequence
-Positive|标注元素必须为严格的正值|BigDecimal,BigInteger, CharSequence,byte,short, int, long,Byte,Short, Integer,Long
-PositiveOrZero|标注元素必须为严格的正值或者0值|BigDecimal,BigInteger, CharSequence,byte,short, int, long,Byte,Short, Integer,Long
-Size(min,max)|标注元素必须在指定范围之内|CharSequence,Collection,Map,Array
+| 注解                        | 说明                                             | 数据类型                                                                                                                                                                           |
+| --------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AssertTrue                  | 标注元素必须为true                               | Boolean                                                                                                                                                                            |
+| AssertFalse                 | 标注元素必须为false                              | Boolean                                                                                                                                                                            |
+| DecimalMax(value,isclusive) | 标注元素必须小于等于指定值                       | BigDecimal,BigInteger, CharSequence,byte,short, int, long,Byte,Short, Integer,Long                                                                                                 |
+| DecimalMin(value,isclusive) | 标注元素必须大于等于指定值                       | BigDecimal,BigInteger, CharSequence,byte,short, int, long,Byte,Short, Integer,Long                                                                                                 |
+| Digits(integer,fraction)    | 标注元素必须位于指定位数之内                     | BigDecimal,BigInteger, CharSequence,byte,short, int, long,Byte,Short, Integer,Long                                                                                                 |
+| Email(regexp,flags)         | 标注元素必须为格式正确的邮件地址                 | CharSequence                                                                                                                                                                       |
+| Future                      | 标注元素必须为将来的日期                         | Date,Calendar,Instant, LocalDate,LocalDateTime, LocalTime,MonthDay, OffsetDateTime,OffsetTime, Year,YearMonth, ZonedDateTime,HijrahDate, JapaneseDate,MinguoDate, ThaiBuddhistDate |
+| FutureOrPresent             | 标注元素必须为现在或将来的日期                   | 同Future                                                                                                                                                                           |
+| Max(value)                  | 标注元素必须小于等于指定值                       | BigDecimal,BigInteger, CharSequence,byte,short, int, long,Byte,Short, Integer,Long                                                                                                 |
+| Min(value)                  | 标注元素必须大于等于指定值                       | BigDecimal,BigInteger, CharSequence,byte,short, int, long,Byte,Short, Integer,Long                                                                                                 |
+| Negative                    | 标注元素必须为严格负值                           | BigDecimal,BigInteger, CharSequence,byte,short, int, long,Byte,Short, Integer,Long                                                                                                 |
+| NegativeOrZero              | 标注元素必须为严格的负值或者0值                  | BigDecimal,BigInteger, CharSequence,byte,short, int, long,Byte,Short, Integer,Long                                                                                                 |
+| NotBlank                    | 标注元素必须不为null，且必须包含至少一个非空字符 | CharSequence                                                                                                                                                                       |
+| NotEmpty                    | 标注元素必须不为null，且必须包含至少一个子元素   | CharSequence,Collection,Map,Array                                                                                                                                                  |
+| NotNull                     | 标注元素必须不为null                             | all                                                                                                                                                                                |
+| Null                        | 标注元素必须为null                               | all                                                                                                                                                                                |
+| Past                        | 标注元素必须为过去的日期                         | 同Future                                                                                                                                                                           |
+| PastOrPresent               | 标注元素必须为过去的或者现在的日期               | 同Future                                                                                                                                                                           |
+| Pattern(regexp,flags)       | 标注元素必须匹配给定的正则表达式                 | CharSequence                                                                                                                                                                       |
+| Positive                    | 标注元素必须为严格的正值                         | BigDecimal,BigInteger, CharSequence,byte,short, int, long,Byte,Short, Integer,Long                                                                                                 |
+| PositiveOrZero              | 标注元素必须为严格的正值或者0值                  | BigDecimal,BigInteger, CharSequence,byte,short, int, long,Byte,Short, Integer,Long                                                                                                 |
+| Size(min,max)               | 标注元素必须在指定范围之内                       | CharSequence,Collection,Map,Array                                                                                                                                                  |
 
 > Hibernate Validation
 
-注解|说明|备注
----|---|---
-Length(min,max)|标注元素的长度必须在指定范围之内，包含最大值|字符串
-Range(min,max)|标注元素值必须在指定范围之内|数字值，或者其字符串形式
-URL(regexp,flags)|标注元素必须为格式正确的URL|字符串
-URL(protocol,host,port)|标注元素必须满足给定的协议主机和端口号|字符串
+| 注解                    | 说明                                         | 备注                     |
+| ----------------------- | -------------------------------------------- | ------------------------ |
+| Length(min,max)         | 标注元素的长度必须在指定范围之内，包含最大值 | 字符串                   |
+| Range(min,max)          | 标注元素值必须在指定范围之内                 | 数字值，或者其字符串形式 |
+| URL(regexp,flags)       | 标注元素必须为格式正确的URL                  | 字符串                   |
+| URL(protocol,host,port) | 标注元素必须满足给定的协议主机和端口号       | 字符串                   |
 
 ### 目标
+
 整合 hibernate-validator，使用注解的方式对接口入参进行校验。
 
 ### 操作步骤
+
 #### 添加依赖
+
 `spring-boot-starter-web` 已经默认添加对 `hibernate-validator` 的依赖
+
 ```xml
 <dependencies>
     <dependency>
@@ -82,6 +88,7 @@ URL(protocol,host,port)|标注元素必须满足给定的协议主机和端口�
 #### 编码
 
 1. 添加校验规则
+
 ```java
 @Getter
 @Setter
@@ -108,8 +115,8 @@ public class User {
 
 在 Controller 接口的参数前面添加 @Valid 注解，入参注入时便会自动进行规则校验，如果校验成功，则执行方法体，如果校验失败，有两种处理方法。
 
- - 在参数列表的最后面添加一个 BindingResult 对象获取校验结果，自行组织输出内容。
- - 不使用 BindingResult 对象，则框架抛出异常，通过异常处理机制可以进行捕获，组织输出内容。
+- 在参数列表的最后面添加一个 BindingResult 对象获取校验结果，自行组织输出内容。
+- 不使用 BindingResult 对象，则框架抛出异常，通过异常处理机制可以进行捕获，组织输出内容。
 
 ```java
 @RestController
@@ -147,6 +154,7 @@ public class UserController {
 ```
 
 3. 启动类
+
 ```java
 @SpringBootApplication
 public class Application {
@@ -215,7 +223,7 @@ public class UserTest {
 
 ### 源码地址
 
-本章源码 : <https://gitee.com/gongm_24/spring-boot-tutorial.git>
+本章源码 : [https://github.com/lizhengdan/spring-boot-tutorial.git](https://github.com/lizhengdan/spring-boot-tutorial.git)
 
 ### 结束语
 
@@ -223,11 +231,11 @@ public class UserTest {
 
 ### 参考资料
 
- - <http://www.cnblogs.com/mr-yang-localhost/p/7812038.html>
- - <https://blog.csdn.net/qq_22845447/article/details/84034289>
- - <https://cloud.tencent.com/developer/article/1054194>
- - <https://www.cnblogs.com/V1haoge/p/9953744.html>
- 
+- [http://www.cnblogs.com/mr-yang-localhost/p/7812038.html](http://www.cnblogs.com/mr-yang-localhost/p/7812038.html)
+- [https://blog.csdn.net/qq_22845447/article/details/84034289](https://blog.csdn.net/qq_22845447/article/details/84034289)
+- [https://cloud.tencent.com/developer/article/1054194](https://cloud.tencent.com/developer/article/1054194)
+- [https://www.cnblogs.com/V1haoge/p/9953744.html](https://www.cnblogs.com/V1haoge/p/9953744.html)
+
 ### 扩展
 
 #### 自定义校验

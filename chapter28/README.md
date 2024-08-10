@@ -1,12 +1,12 @@
 整合SpringSecurity之前后端分离使用JWT实现登录鉴权
----
+-------------------------------------------------
 
 在前面的文章中，我们已经使用 token 实现前后端分离的系统登录及访问鉴权。
 
- - [第二十四章：整合SpringSecurity之最简登录及方法鉴权](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter24)
- - [第二十五章：整合SpringSecurity之基于数据库实现登录鉴权](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter25)
- - [第二十六章：整合SpringSecurity之前后端分离使用JSON格式交互](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter26)
- - [第二十七章：整合SpringSecurity之前后端分离使用Token实现登录鉴权](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter27)
+- [第二十四章：整合SpringSecurity之最简登录及方法鉴权](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter24)
+- [第二十五章：整合SpringSecurity之基于数据库实现登录鉴权](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter25)
+- [第二十六章：整合SpringSecurity之前后端分离使用JSON格式交互](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter26)
+- [第二十七章：整合SpringSecurity之前后端分离使用Token实现登录鉴权](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter27)
 
 登录成功后，服务端会生成一个 token 并存储起来，
 这样客户端携 token 再次访问时，服务端就可以根据 token 获取当前用户的登录状态及用户信息。
@@ -17,13 +17,17 @@
 JWT（Java Web Token）就是这样的一种技术。
 
 ### 相关知识
+
 #### 什么是 JWT
-请参考阮一峰博客 <http://www.ruanyifeng.com/blog/2018/07/json_web_token-tutorial.html>，里面有比较详尽的介绍。
+
+请参考阮一峰博客 [http://www.ruanyifeng.com/blog/2018/07/json_web_token-tutorial.html](http://www.ruanyifeng.com/blog/2018/07/json_web_token-tutorial.html)，里面有比较详尽的介绍。
 
 ### 目标
+
 整合 SpringSecurity 实现使用 JWT 进行登录及访问鉴权。
 
 ### 准备工作
+
 创建用户表 `user`、角色表 `role`、用户角色关系表 `user_role`，因为 JWT 本身就是用户信息，所以不用再另行存储，可以直接解析
 
 ```mysql
@@ -50,8 +54,11 @@ CREATE TABLE `user_role` (
 ```
 
 ### 操作步骤
+
 #### 添加依赖
+
 引入 Spring Boot Starter 父工程
+
 ```xml
 <parent>
     <groupId>org.springframework.boot</groupId>
@@ -61,6 +68,7 @@ CREATE TABLE `user_role` (
 ```
 
 添加 `springSecurity`、`mybatisPlus` 及 `JWT` 的依赖，添加后的整体依赖如下
+
 ```xml
 <dependencies>
     <dependency>
@@ -103,8 +111,11 @@ CREATE TABLE `user_role` (
     </dependency>
 </dependencies>
 ```
+
 #### 配置
+
 配置一下数据源
+
 ```yaml
 spring:
   datasource:
@@ -112,9 +123,13 @@ spring:
     username: app
     password: 123456
 ```
+
 #### 编码
+
 ##### 实体类
+
 角色实体类 Role，实现权限接口 GrantedAuthority
+
 ```java
 @Data
 @NoArgsConstructor
@@ -132,7 +147,9 @@ public class Role implements GrantedAuthority {
     }
 }
 ```
+
 用户实体类 user，实现权限接口 UserDetails，主要方法是 getAuthorities，用于获取用户的角色列表
+
 ```java
 @Data
 @NoArgsConstructor
@@ -176,7 +193,9 @@ public class User implements UserDetails {
 
 }
 ```
+
 用户角色关系实体
+
 ```java
 @Data
 @NoArgsConstructor
@@ -189,8 +208,11 @@ public class UserRole {
     private Long roleId;
 }
 ```
+
 ##### Repository 层
+
 分别为四个实体类添加 Mapper
+
 ```java
 @Mapper
 public interface RoleRepository extends BaseMapper<Role> {
@@ -202,9 +224,13 @@ public interface UserRepository extends BaseMapper<User> {
 public interface UserRoleRepository extends BaseMapper<UserRole> {
 }
 ```
+
 #### 权限配置
+
 ##### 实现 UserDetailsService 接口
+
 UserDetailsService 是 SpringSecurity 提供的登陆时用于根据用户名获取用户信息的接口
+
 ```java
 @AllArgsConstructor
 @Service
@@ -236,6 +262,7 @@ public class UserService implements UserDetailsService {
 ```
 
 ##### 自定义登录参数格式
+
 ```java
 @Data
 public class LoginDto {
@@ -248,9 +275,11 @@ public class LoginDto {
 ```
 
 ##### 自定义登录鉴权过滤器
+
 继承 SpringSecurity 提供的 AbstractAuthenticationProcessingFilter 类，实现 attemptAuthentication 方法，用于登录校验。
 本例中，模拟前端使用 json 格式传递参数，所以通过 objectMapper.readValue 的方式从流中获取入参，之后借用了用户名密码登录的校验，
 如果鉴权成功，使用 JWT 工具类生成 token 并将 token 返回给前端。
+
 ```java
 @Data
 public class JsonAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
@@ -290,7 +319,9 @@ public class JsonAuthenticationFilter extends AbstractAuthenticationProcessingFi
 ```
 
 ##### 自定义登陆成功后处理
+
 实现 SpringSecurity 提供的 AuthenticationSuccessHandler 接口，使用 JSON 格式返回
+
 ```java
 @AllArgsConstructor
 public class JsonLoginSuccessHandler implements AuthenticationSuccessHandler {
@@ -309,7 +340,9 @@ public class JsonLoginSuccessHandler implements AuthenticationSuccessHandler {
 ```
 
 ##### 自定义登陆失败后处理
+
 实现 SpringSecurity 提供的 AuthenticationFailureHandler 接口，使用 JSON 格式返回
+
 ```java
 public class JsonLoginFailureHandler implements AuthenticationFailureHandler {
 
@@ -325,8 +358,10 @@ public class JsonLoginFailureHandler implements AuthenticationFailureHandler {
 ```
 
 ##### 自定义权限校验失败后处理
+
 登陆成功之后，访问接口之前 SpringSecurity 会进行鉴权，如果没有访问权限，需要对返回进行处理。
 实现 SpringSecurity 提供的 AccessDeniedHandler 接口，使用 JSON 格式返回
+
 ```java
 public class JsonAccessDeniedHandler implements AccessDeniedHandler {
 
@@ -342,7 +377,9 @@ public class JsonAccessDeniedHandler implements AccessDeniedHandler {
 ```
 
 ##### 自定义未登录后处理
+
 实现 SpringSecurity 提供的 AuthenticationEntryPoint 接口，使用 JSON 格式返回
+
 ```java
 public class JsonAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
@@ -358,8 +395,10 @@ public class JsonAuthenticationEntryPoint implements AuthenticationEntryPoint {
 ```
 
 ##### 自定义 Token 验证过滤器
+
 客户端登录成功时，后台会把生成的 token 返回给前端，之后客户端每次请求后台接口将会把这个 token 附在 header 头中传递给后台，
 后台会使用 JWT 工具类进行验证这个 token 是否有效，并把 JWT 中包含的信息解析成用户对象，加载至 SpringSecurity 中。
+
 ```java
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
@@ -392,6 +431,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 ```
 
 ##### JWT 工具类
+
 ```java
 public final class JwtUtils {
 
@@ -441,8 +481,10 @@ public final class JwtUtils {
 ```
 
 ##### 注册
+
 在 configure 方法中将自定义的 jsonAuthenticationFilter 及 tokenAuthenticationFilter 注册进 SpringSecurity 的过滤器链中，
 并禁用 session。
+
 ```java
 @Configuration
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true, jsr250Enabled = true)
@@ -499,6 +541,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 ```
 
 #### 启动类
+
 ```java
 @SpringBootApplication
 public class Application {
@@ -509,9 +552,13 @@ public class Application {
 
 }
 ```
+
 ### 验证结果
+
 #### 初始化数据
+
 执行测试用例进行初始化数据
+
 ```java
 @Slf4j
 @RunWith(SpringRunner.class)
@@ -553,8 +600,9 @@ public class SecurityTest {
 
 ### 源码地址
 
-本章源码 : <https://gitee.com/gongm_24/spring-boot-tutorial.git>
+本章源码 : [https://github.com/lizhengdan/spring-boot-tutorial.git](https://github.com/lizhengdan/spring-boot-tutorial.git)
 
 ### 结束语
+
 与普通的 token 不同的是，JWT 作为 token 本身就已经包含了信息，而普通的 token 就只是一个字符串，需要用户信息就必须再去数据库或者其它中间件中进行加载，JWT 则可以省去这一步，这可以大幅度降低系统的 IO，
 但是 JWT 也有自己的问题，那就是一旦生成，服务端将无法控制它，只要在有效期内就可以一直使用，所以 JWT 更适用于短期授权。

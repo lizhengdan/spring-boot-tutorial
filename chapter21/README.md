@@ -1,14 +1,17 @@
 整合Redis之最简配置
----
+-------------------
 
 ### 相关知识
+
 #### Redis 简介
+
 Redis 是一个开源的，基于内存中的，高性能的数据存储系统，它可以用作数据库、缓存和消息中间件。
 Redis 支持多种类型的数据结构，如：string、hashes、lists、sets、sortedSets等。
 Redis 内置了复制(replication)、LUA脚本(Lua scripting)、事务(transactions)、磁盘持久化(persistence)、LRU驱动事件(LRU eviction)等功能。
 Redis 可以通过哨兵(Sentinel)以及集群(Cluster)提供高可用性
 
 #### Lettuce 和 Jedis
+
 Lettuce 和 Jedis 都是连接 Redis Server 的客户端程序，
 SpringBoot2.x 之前默认使用 Jedis 作为与 Redis 进行交互的组件，SpringBoot2.x 则换成了 Lettuce（生菜）。
 Jedis 在实现上是直连 redis server，多线程环境下非线程安全，除非使用连接池，为每个 Jedis 实例增加物理连接。
@@ -16,17 +19,23 @@ Lettuce 基于 Netty 的连接实例（StatefulRedisConnection），可以在多
 同时它是可伸缩的设计，一个连接实例不够的情况也可以按需增加连接实例。
 
 ### 目标
+
 整合 Redis 实现对 redis 的增删查改
 
 ### 准备工作
+
 #### 安装 Redis
-介绍使用 Docker 方式安装，Docker 安装可以参考 <https://blog.csdn.net/gongm24/article/details/86357866>
+
+介绍使用 Docker 方式安装，Docker 安装可以参考 [https://blog.csdn.net/gongm24/article/details/86357866](https://blog.csdn.net/gongm24/article/details/86357866)
+
 ##### 下载镜像
+
 ```
 docker pull redis
 ```
 
 ##### 运行镜像
+
 ```
 docker run --name redis \
     -p 6379:6379 \
@@ -34,13 +43,17 @@ docker run --name redis \
 ```
 
 ##### 检查是否安装成功，使用客户端登入容器，执行 `redis-cli -a 123456` 命令，进行连接
+
 ```
 docker exec -it redis /bin/bash
 ```
 
 ### 操作步骤
+
 #### 添加依赖
+
 引入 Spring Boot Starter 父工程
+
 ```xml
 <parent>
     <groupId>org.springframework.boot</groupId>
@@ -50,6 +63,7 @@ docker exec -it redis /bin/bash
 ```
 
 添加 `spring-boot-starter-data-redis` 的依赖
+
 ```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
@@ -63,6 +77,7 @@ docker exec -it redis /bin/bash
 ```
 
 添加后的整体依赖如下
+
 ```xml
 <dependencies>
     <dependency>
@@ -93,7 +108,9 @@ docker exec -it redis /bin/bash
     </dependency>
 </dependencies>
 ```
+
 #### 配置
+
 ```yaml
 spring:
   redis:
@@ -116,6 +133,7 @@ spring:
 ```
 
 #### 编码
+
 ```java
 @Slf4j
 @RunWith(SpringRunner.class)
@@ -137,8 +155,11 @@ public class RedisTest {
 ```
 
 #### 编码（使用自定义序列化）
+
 ##### 定义对象
+
 @NoArgsConstructor 一定要记得加，反序列化时会调用无参构造函数进行对象实例化。
+
 ```java
 @Data
 @NoArgsConstructor
@@ -152,7 +173,9 @@ public class User {
 ```
 
 ##### 注册自定义 RedisTemplate
+
 值的序列化选择了 jackson
+
 ```java
 @Configuration
 @AutoConfigureAfter(value = RedisAutoConfiguration.class)
@@ -171,6 +194,7 @@ public class CustomConfig {
 ```
 
 ##### 测试
+
 ```java
 @Slf4j
 @RunWith(SpringRunner.class)
@@ -194,22 +218,27 @@ public class RedisTest {
 
 ### 源码地址
 
-本章源码 : <https://gitee.com/gongm_24/spring-boot-tutorial.git>
+本章源码 : [https://github.com/lizhengdan/spring-boot-tutorial.git](https://github.com/lizhengdan/spring-boot-tutorial.git)
 
 ### 参考
- - <https://blog.52itstyle.vip/archives/1264/>
+
+- [https://blog.52itstyle.vip/archives/1264/](https://blog.52itstyle.vip/archives/1264/)
 
 ### 结束语
+
 下列的就是Redis其它类型所对应的操作方式
- - opsForValue： 对应 String（字符串）
- - opsForZSet： 对应 ZSet（有序集合）
- - opsForHash： 对应 Hash（哈希）
- - opsForList： 对应 List（列表）
- - opsForSet： 对应 Set（集合）
- - opsForGeo： 对应 GEO（地理位置）
+
+- opsForValue： 对应 String（字符串）
+- opsForZSet： 对应 ZSet（有序集合）
+- opsForHash： 对应 Hash（哈希）
+- opsForList： 对应 List（列表）
+- opsForSet： 对应 Set（集合）
+- opsForGeo： 对应 GEO（地理位置）
 
 ### 扩展
+
 #### Redis 相关资料
-spring-data-redis文档： <https://docs.spring.io/spring-data/redis/docs/2.0.1.RELEASE/reference/html/#new-in-2.0.0>
-Redis 文档： <https://redis.io/documentation>
-Redis 中文文档： <http://www.redis.cn/commands.html>
+
+spring-data-redis文档： [https://docs.spring.io/spring-data/redis/docs/2.0.1.RELEASE/reference/html/#new-in-2.0.0](https://docs.spring.io/spring-data/redis/docs/2.0.1.RELEASE/reference/html/#new-in-2.0.0)
+Redis 文档： [https://redis.io/documentation](https://redis.io/documentation)
+Redis 中文文档： [http://www.redis.cn/commands.html](http://www.redis.cn/commands.html)

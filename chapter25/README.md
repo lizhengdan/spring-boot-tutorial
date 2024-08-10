@@ -1,14 +1,16 @@
 整合SpringSecurity之基于数据库实现登录鉴权
----
+------------------------------------------
 
 在前一章中，我们实现了整合 SpringSecurity 框架，基于内存的最简配置
 
- - [第二十四章：整合SpringSecurity之最简登录及方法鉴权](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter24)
+- [第二十四章：整合SpringSecurity之最简登录及方法鉴权](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter24)
 
 ### 目标
+
 整合 SpringSecurity 及 MybatisPlus 实现使用读取数据库数据进行登陆鉴权
 
 ### 准备工作
+
 创建用户表 `user`、角色表 `role`、用户角色关系表 `user_role`
 
 ```mysql
@@ -35,8 +37,11 @@ CREATE TABLE `user_role` (
 ```
 
 ### 操作步骤
+
 #### 添加依赖
+
 引入 Spring Boot Starter 父工程
+
 ```xml
 <parent>
     <groupId>org.springframework.boot</groupId>
@@ -46,6 +51,7 @@ CREATE TABLE `user_role` (
 ```
 
 添加 `springSecurity` 及 `mybatisPlus` 的依赖，添加后的整体依赖如下
+
 ```xml
 <dependencies>
     <dependency>
@@ -82,8 +88,11 @@ CREATE TABLE `user_role` (
     </dependency>
 </dependencies>
 ```
+
 #### 配置
+
 配置一下数据源
+
 ```yaml
 spring:
   datasource:
@@ -91,9 +100,13 @@ spring:
     username: app
     password: 123456
 ```
+
 #### 编码
+
 ##### 实体类
+
 角色实体类 Role，实现权限接口 GrantedAuthority
+
 ```java
 @Data
 @NoArgsConstructor
@@ -111,7 +124,9 @@ public class Role implements GrantedAuthority {
     }
 }
 ```
+
 用户实体类 user，实现权限接口 UserDetails，主要方法是 getAuthorities，用于获取用户的角色列表
+
 ```java
 @Data
 @NoArgsConstructor
@@ -153,7 +168,9 @@ public class User implements UserDetails {
 
 }
 ```
+
 用户角色关系实体
+
 ```java
 @Data
 @NoArgsConstructor
@@ -168,8 +185,11 @@ public class UserRole {
 
 }
 ```
+
 ##### Repository 层
+
 分别为三个实体类添加 Mapper
+
 ```java
 @Mapper
 public interface RoleRepository extends BaseMapper<Role> {
@@ -181,9 +201,13 @@ public interface UserRepository extends BaseMapper<User> {
 public interface UserRoleRepository extends BaseMapper<UserRole> {
 }
 ```
+
 #### 权限配置
+
 ##### 实现 UserDetailsService 接口
+
 UserDetailsService 是 SpringSecurity 提供的登陆时用于根据用户名获取用户信息的接口
+
 ```java
 @AllArgsConstructor
 @Service
@@ -215,7 +239,9 @@ public class UserService implements UserDetailsService {
 ```
 
 ##### 权限配置
+
 继承 SpringSecurity 提供的 WebSecurityConfigurerAdapter 配置 userDetailsService 及加密方式。
+
 ```java
 @Configuration
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true, jsr250Enabled = true)
@@ -233,6 +259,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 ```
 
 #### 启动类
+
 ```java
 @SpringBootApplication
 public class Application {
@@ -243,9 +270,13 @@ public class Application {
 
 }
 ```
+
 ### 验证结果
+
 #### 初始化数据
+
 执行测试用例进行初始化数据
+
 ```java
 @Slf4j
 @RunWith(SpringRunner.class)
@@ -286,11 +317,13 @@ public class SecurityTest {
 ```
 
 #### 校验
+
 网页访问 http://localhost:8080，将自动跳转登录页，输入 `user/123456` 进行登录，可以使用 debugger 进行调试。
 
 ### 源码地址
 
-本章源码 : <https://gitee.com/gongm_24/spring-boot-tutorial.git>
+本章源码 : [https://github.com/lizhengdan/spring-boot-tutorial.git](https://github.com/lizhengdan/spring-boot-tutorial.git)
 
 ### 结束语
+
 使用数据库进行鉴权，是实际应用中最基本的需求。

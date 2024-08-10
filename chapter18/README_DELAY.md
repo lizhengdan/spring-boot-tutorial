@@ -1,33 +1,42 @@
 整合RabbitMQ之实现延迟队列
----
+--------------------------
 
 前面的文章
 
- - [第十七章：整合RabbitMQ之ACK消息确认](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter17)
- - [第十八章：整合RabbitMQ之死信队列](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter18)
+- [第十七章：整合RabbitMQ之ACK消息确认](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter17)
+- [第十八章：整合RabbitMQ之死信队列](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter18)
 
 ### 相关知识
+
 #### 什么是延迟队列
+
 队列中的消息在等待指定时间后，消费者才能够进行消费。
 
 #### 应用场景
- - 商城系统，下单后半个小时未付款，自动取消订单
- 
+
+- 商城系统，下单后半个小时未付款，自动取消订单
+
 #### 实现方式
+
 RabbitMQ 本身没有直接支持延迟队列功能，但是通过控制消息的生存时间及死信队列，可以模拟出延迟队列的效果。
 
 RabbitMQ 控制消息的生存时间有两种方法：
- - 设置队列属性（x-message-ttl），队列中所有消息都有相同的过期时间
- - 设置消息属性（expiration），拥有单独的过期时间
- 
-关于死信队列可以参考 <https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter18>
+
+- 设置队列属性（x-message-ttl），队列中所有消息都有相同的过期时间
+- 设置消息属性（expiration），拥有单独的过期时间
+
+关于死信队列可以参考 [https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter18](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter18)
 
 ### 目标
+
 整合 Spring boot 提供的 `spring-boot-starter-amqp`，实现延迟队列
 
 ### 操作步骤
+
 #### 添加依赖
+
 引入 Spring Boot Starter 父工程
+
 ```xml
 <parent>
     <groupId>org.springframework.boot</groupId>
@@ -37,6 +46,7 @@ RabbitMQ 控制消息的生存时间有两种方法：
 ```
 
 添加 `spring-boot-starter-amqp` 的依赖
+
 ```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
@@ -45,6 +55,7 @@ RabbitMQ 控制消息的生存时间有两种方法：
 ```
 
 添加后的整体依赖如下
+
 ```xml
 <dependencies>
     <dependency>
@@ -70,8 +81,11 @@ RabbitMQ 控制消息的生存时间有两种方法：
     </dependency>
 </dependencies>
 ```
+
 #### 编码(发送方)
+
 #### 配置
+
 ```yaml
 spring:
   rabbitmq:
@@ -80,10 +94,13 @@ spring:
     username: admin
     password: admin
 ```
+
 ##### 定义队列
+
 定义一个测试队列 TestDeadQueue，并为该队列配置死信队列，
 配置的方法就是在声明队列的时候，添加参数 `x-dead-letter-exchange` 及 `x-dead-letter-routing-key`，
 其实就是在消费失败时，将消息使用该 exchange 及 routing 发送至指定队列
+
 ```java
 @Configuration
 public class DeadConfig {
@@ -127,6 +144,7 @@ public class DeadConfig {
 ```
 
 ##### 测试发送
+
 ```java
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
@@ -135,7 +153,7 @@ public class MqTest {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
-    
+  
     // 队列设置了过期时间
     @Test
     public void testDelayQueue() throws Exception {
@@ -167,11 +185,14 @@ public class MqTest {
 ```
 
 ### 源码地址
-本章源码 : <https://gitee.com/gongm_24/spring-boot-tutorial.git>
+
+本章源码 : [https://github.com/lizhengdan/spring-boot-tutorial.git](https://github.com/lizhengdan/spring-boot-tutorial.git)
 
 ### 结束语
+
 总结一下延迟消息的生命周期：
-```mermaid 
+
+```mermaid
 flowchat
 st=>start: 客户端发送消息
 e=>end: 消费消息

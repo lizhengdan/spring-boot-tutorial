@@ -1,5 +1,5 @@
 配置高性能服务器Undertow
----
+------------------------
 
 ### 相关知识
 
@@ -14,6 +14,7 @@ undertow 是一个服务器，在相同资源使用量的情况下 undertow 比 
 #### 添加依赖
 
 引入 Spring Boot Starter 父工程
+
 ```xml
 <parent>
     <groupId>org.springframework.boot</groupId>
@@ -55,7 +56,7 @@ Started Application in 2.763 seconds (JVM running for 3.658)
 
 ### 源码地址
 
-本章源码 : <https://gitee.com/gongm_24/spring-boot-tutorial.git>
+本章源码 : [https://github.com/lizhengdan/spring-boot-tutorial.git](https://github.com/lizhengdan/spring-boot-tutorial.git)
 
 ### 结束语
 

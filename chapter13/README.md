@@ -1,33 +1,37 @@
 整合fluent-validator优雅业务校验
----
+--------------------------------
 
 在前面的文章中，我们已经学习了如何使用 hibernate-validator 进行表单校验。
 
- - [第八章：整合hibernate-validator优雅表单校验](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter8)
-
+- [第八章：整合hibernate-validator优雅表单校验](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter8)
 
 ### 相关知识
 
 FluentValidator是一个工具类库，使用流式（Fluent Interface）调用风格让校验跑起来更优雅，代码更简洁，同时验证器（Validator）可以做到开闭原则，实现最大程度的复用。
 
-github地址：<https://github.com/neoremind/fluent-validator>
-中文使用手册：<http://neoremind.com/2016/02/java%E7%9A%84%E4%B8%9A%E5%8A%A1%E9%80%BB%E8%BE%91%E9%AA%8C%E8%AF%81%E6%A1%86%E6%9E%B6fluent-validator/>
+github地址：[https://github.com/neoremind/fluent-validator](https://github.com/neoremind/fluent-validator)
+中文使用手册：[http://neoremind.com/2016/02/java%E7%9A%84%E4%B8%9A%E5%8A%A1%E9%80%BB%E8%BE%91%E9%AA%8C%E8%AF%81%E6%A1%86%E6%9E%B6fluent-validator/](http://neoremind.com/2016/02/java%E7%9A%84%E4%B8%9A%E5%8A%A1%E9%80%BB%E8%BE%91%E9%AA%8C%E8%AF%81%E6%A1%86%E6%9E%B6fluent-validator/)
 
 #### 特性：
- - 验证逻辑与业务逻辑不再耦合，摒弃原来不规范的验证逻辑散落的现象。
- - 校验器各司其职，好维护，可复用，可扩展，一个校验器（Validator）只负责某个属性或者对象的校验，可以做到职责单一，易于维护，并且可复用。
- - 流式风格（Fluent Interface）调用。
- - 使用注解方式验证，可以装饰在属性上，减少硬编码量。
- - 支持JSR 303 – Bean Validation标准，也就是说可以兼容 Hibernate Validator。
- - Spring良好集成
- - 回调给予你充分的自由度，验证过程中发生的错误、异常，验证结果的返回，开发人员都可以定制。
+
+- 验证逻辑与业务逻辑不再耦合，摒弃原来不规范的验证逻辑散落的现象。
+- 校验器各司其职，好维护，可复用，可扩展，一个校验器（Validator）只负责某个属性或者对象的校验，可以做到职责单一，易于维护，并且可复用。
+- 流式风格（Fluent Interface）调用。
+- 使用注解方式验证，可以装饰在属性上，减少硬编码量。
+- 支持JSR 303 – Bean Validation标准，也就是说可以兼容 Hibernate Validator。
+- Spring良好集成
+- 回调给予你充分的自由度，验证过程中发生的错误、异常，验证结果的返回，开发人员都可以定制。
 
 ### 目标
+
 替换 hibernate-validator 为 fluent-validator，实现对入参的校验及异常输出
 
 ### 操作步骤
+
 #### 添加依赖
+
 引入 Spring Boot Starter 父工程
+
 ```xml
 <parent>
     <groupId>org.springframework.boot</groupId>
@@ -37,6 +41,7 @@ github地址：<https://github.com/neoremind/fluent-validator>
 ```
 
 添加 `fluent-validator` 的依赖
+
 ```xml
 <dependency>
 	<groupId>com.baidu.unbiz</groupId>
@@ -46,6 +51,7 @@ github地址：<https://github.com/neoremind/fluent-validator>
 ```
 
 因为 spring-boot 默认使用 logback 作为日志输出组件，所以在引入的时候需要去掉 fluent-validate 自身的 slf4j
+
 ```xml
 <dependency>
     <groupId>com.baidu.unbiz</groupId>
@@ -59,7 +65,9 @@ github地址：<https://github.com/neoremind/fluent-validator>
     </exclusions>
 </dependency>
 ```
+
 fluent-validator 集成 hibernate-validator 需要添加依赖
+
 ```xml
 <dependency>
     <groupId>com.baidu.unbiz</groupId>
@@ -67,7 +75,9 @@ fluent-validator 集成 hibernate-validator 需要添加依赖
     <version>1.0.9</version>
 </dependency>
 ```
+
 fluent-validator 集成 spring 需要添加依赖
+
 ```xml
 <dependency>
     <groupId>com.baidu.unbiz</groupId>
@@ -77,6 +87,7 @@ fluent-validator 集成 spring 需要添加依赖
 ```
 
 添加后的整体依赖如下
+
 ```xml
 <dependencies>
     <dependency>
@@ -134,9 +145,11 @@ fluent-validator 集成 spring 需要添加依赖
 ```
 
 #### 注册 Fluent-validator
+
 fluent-validate 与 spring 结合使用 annotation 方式进行参数校验，需要借助于 spring 的 AOP，fluent-validate 提供了处理类 FluentValidateInterceptor，但是 fluent-validate 提供的默认验证回调类 DefaultValidateCallback 对校验失败的情况并没有处理，所以需要自行实现一个
 
 1. 自定义异常回调类
+
 ```java
 public static class HussarValidateCallBack extends DefaultValidateCallback implements ValidateCallback {
     @Override
@@ -187,6 +200,7 @@ public class ValidateConfiguartion {
 ```
 
 3. 全局异常处理
+
 ```java
 @Slf4j
 @RestControllerAdvice
@@ -229,9 +243,11 @@ public class RestExceptionHandler {
 ```
 
 #### 编码
+
 1. 添加校验规则
 
 为业务类添加校验规则，此处，并没有添加 fluent-validate 注解，而是保持了原来的 hibernate-validate
+
 ```java
 @Getter
 @Setter
@@ -265,6 +281,7 @@ public class UserController {
 ```
 
 3. 启动类
+
 ```java
 @SpringBootApplication
 public class Application {
@@ -279,6 +296,7 @@ public class Application {
 ### 验证结果
 
 编写测试用例
+
 ```java
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
@@ -315,6 +333,7 @@ public class UserTest {
 ```
 
 返回结果为
+
 ```
 MockHttpServletResponse:
            Status = 200
@@ -326,7 +345,7 @@ MockHttpServletResponse:
 
 ### 源码地址
 
-本章源码 : <https://gitee.com/gongm_24/spring-boot-tutorial.git>
+本章源码 : [https://github.com/lizhengdan/spring-boot-tutorial.git](https://github.com/lizhengdan/spring-boot-tutorial.git)
 
 ### 结束语
 
@@ -357,6 +376,7 @@ public class SexValidator extends ValidatorHandler<Integer> implements Validator
 ```
 
 Validator 接口定义了三个方法，解释如下
+
 ```java
 public interface Validator<T> {
  
@@ -424,12 +444,13 @@ public class UserBO {
 #### 级联验证
 
 在对象属性上添加 @FluentValid 注解，代替 hibernate-validate 的 @Valid。
+
 ```java
 public class Garage {
  
     @FluentValidate({CarNotExceedLimitValidator.class})
     @FluentValid
     private List<Car> carList;
-    
+  
 }
 ```

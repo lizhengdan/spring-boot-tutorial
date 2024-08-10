@@ -1,32 +1,38 @@
 整合Redis之实现分布式锁
----
+-----------------------
 
 通过前面的文章，我们学会了如何在 SpringBoot 的项目中使用 Redis
 
- - [第二十一章：整合Redis之最简配置](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter21)
+- [第二十一章：整合Redis之最简配置](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter21)
 
 ### 相关知识
+
 #### 分布式锁
+
 分布式锁是控制分布式系统之间同步访问共享资源的一种方式，
 在分布式系统中，如果不同的应用之间共享一个或一组资源，那么访问这些资源的时候，
 往往需要互斥来防止彼此干扰来保证一致性，在这种情况下，便需要使用到分布式锁。
- - 互斥性。在分布式环境下，同一时间只有一个客户端能持有锁。
- - 具备锁失效机制，防止死锁。例如锁的持有者在持有锁期间崩溃而没有主动解锁，锁需要在规定时间后自动失效，以保证后续可用。
- - 具备可重入性，防止死锁。
- - 解铃还须系铃人。释放锁与加锁应该为相同客户端，不能把别人加的锁给解了。
+
+- 互斥性。在分布式环境下，同一时间只有一个客户端能持有锁。
+- 具备锁失效机制，防止死锁。例如锁的持有者在持有锁期间崩溃而没有主动解锁，锁需要在规定时间后自动失效，以保证后续可用。
+- 具备可重入性，防止死锁。
+- 解铃还须系铃人。释放锁与加锁应该为相同客户端，不能把别人加的锁给解了。
 
 #### Redis 实现分布式锁原理
-实现原理可参考 <http://www.redis.cn/topics/distlock.html>。
+
+实现原理可参考 [http://www.redis.cn/topics/distlock.html](http://www.redis.cn/topics/distlock.html)。
 
 Redis 是单线程的，所以 Redis 命令具有原子性，Redis 提供了以下几个命令
- - setnx，意思是待创建的键如果已存在，则创建失败，否则创建成功，实现互斥性。
- - expire，给键加上过期时间，实现自动失效机制
- - set key value \[EX|PX\] \[NX\]，可以将上面两个命令的动作，在这一个命令实现，其中，EX|PX 是过期时间，EX 使用秒，PX 使用毫秒，NX 表示 setnx 的意思
+
+- setnx，意思是待创建的键如果已存在，则创建失败，否则创建成功，实现互斥性。
+- expire，给键加上过期时间，实现自动失效机制
+- set key value \[EX|PX\] \[NX\]，可以将上面两个命令的动作，在这一个命令实现，其中，EX|PX 是过期时间，EX 使用秒，PX 使用毫秒，NX 表示 setnx 的意思
 
 因为锁的实现中拥有比较、加锁等一系列操作，为保证原子性，需要引入 Lua 脚本
 
 加锁流程：
-```mermaid 
+
+```mermaid
 flowchat
 st=>start: 开始加锁
 e=>end: 加锁成功
@@ -47,7 +53,8 @@ cond3(no)->e3
 ```
 
 释放锁流程
-```mermaid 
+
+```mermaid
 flowchat
 st=>start: 开始释放加锁
 e=>end: 释放成功
@@ -65,11 +72,15 @@ cond2(no, left)->e2
 ```
 
 ### 目标
+
 整合 Redis 实现分布式锁
 
 ### 操作步骤
+
 #### 添加依赖
+
 引入 Spring Boot Starter 父工程
+
 ```xml
 <parent>
     <groupId>org.springframework.boot</groupId>
@@ -79,6 +90,7 @@ cond2(no, left)->e2
 ```
 
 添加 `spring-boot-starter-data-redis` 的依赖
+
 ```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
@@ -92,6 +104,7 @@ cond2(no, left)->e2
 ```
 
 添加后的整体依赖如下
+
 ```xml
 <dependencies>
     <dependency>
@@ -122,7 +135,9 @@ cond2(no, left)->e2
     </dependency>
 </dependencies>
 ```
+
 #### 配置
+
 ```yaml
 spring:
   redis:
@@ -145,11 +160,14 @@ spring:
 ```
 
 #### 编码
+
 实现一个分布式锁，封装数据及实现
- - key：业务键
- - redisKey：Redis存储的键，在业务键上增加一个前缀，等于增加一个命名空间的意思
- - value：键值，创建时使用UUID生成，释放时使用该值进行校验操作人身份
- - expire 及 unit：过期时间
+
+- key：业务键
+- redisKey：Redis存储的键，在业务键上增加一个前缀，等于增加一个命名空间的意思
+- value：键值，创建时使用UUID生成，释放时使用该值进行校验操作人身份
+- expire 及 unit：过期时间
+
 ```java
 public class RedisLock {
     // 锁默认前缀
@@ -205,7 +223,9 @@ public class RedisLock {
 ```
 
 ### 验证
+
 分布式锁，需要分布式环境，所以本例中只是简单模拟，创建多个测试用例，每一个用例相当于一个应用程序，同时启动多个用例进行加锁操作，最终只会有一个加锁成功。
+
 ```java
 @Slf4j
 @RunWith(SpringRunner.class)
@@ -246,16 +266,20 @@ public class RedisTest {
 
 ### 源码地址
 
-本章源码 : <https://gitee.com/gongm_24/spring-boot-tutorial.git>
+本章源码 : [https://github.com/lizhengdan/spring-boot-tutorial.git](https://github.com/lizhengdan/spring-boot-tutorial.git)
 
 ### 参考
- - <https://blog.52itstyle.vip/archives/1264/>
+
+- [https://blog.52itstyle.vip/archives/1264/](https://blog.52itstyle.vip/archives/1264/)
 
 ### 结束语
+
 分布式锁有很多实现方式，Redis 只是其中一种
 
 ### 扩展
+
 #### Redis 相关资料
-spring-data-redis文档： <https://docs.spring.io/spring-data/redis/docs/2.0.1.RELEASE/reference/html/#new-in-2.0.0>
-Redis 文档： <https://redis.io/documentation>
-Redis 中文文档： <http://www.redis.cn/commands.html>
+
+spring-data-redis文档： [https://docs.spring.io/spring-data/redis/docs/2.0.1.RELEASE/reference/html/#new-in-2.0.0](https://docs.spring.io/spring-data/redis/docs/2.0.1.RELEASE/reference/html/#new-in-2.0.0)
+Redis 文档： [https://redis.io/documentation](https://redis.io/documentation)
+Redis 中文文档： [http://www.redis.cn/commands.html](http://www.redis.cn/commands.html)

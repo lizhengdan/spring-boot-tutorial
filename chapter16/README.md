@@ -1,18 +1,24 @@
 整合Mail实现邮件发送
----
+--------------------
 
 ### 目标
 
 整合 Spring boot 提供的 `spring-boot-starter-mail`，实现本地发送邮件
 
 ### 准备工作
+
 #### 获取邮箱的SMTP服务器
+
 以网易邮箱为例，通过以下步骤，可以查看到邮箱的SMTP服务器地址
+
 > 登陆邮箱 -> 设置 -> 选择 POP3/SMTP/IMAP
 
 ### 操作步骤
+
 #### 添加依赖
+
 引入 Spring Boot Starter 父工程
+
 ```xml
 <parent>
     <groupId>org.springframework.boot</groupId>
@@ -22,6 +28,7 @@
 ```
 
 添加 `spring-boot-starter-mail` 的依赖
+
 ```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
@@ -30,6 +37,7 @@
 ```
 
 添加后的整体依赖如下
+
 ```xml
 <dependencies>
     <dependency>
@@ -55,11 +63,13 @@
     </dependency>
 </dependencies>
 ```
+
 #### 配置
- - host：即准备中提到的SMTP服务器，配置到这里
- - username：用于发送邮件的邮箱
- - password：用于发送邮件的邮箱的密码
- - smtp.auth：设置发送邮件需要进行权限校验
+
+- host：即准备中提到的SMTP服务器，配置到这里
+- username：用于发送邮件的邮箱
+- password：用于发送邮件的邮箱的密码
+- smtp.auth：设置发送邮件需要进行权限校验
 
 ```yaml
 spring:
@@ -74,7 +84,9 @@ spring:
 ```
 
 #### 编码
+
 ##### 实体类
+
 ```java
 @Data
 public class Mail {
@@ -136,6 +148,7 @@ public class MailService {
 ```
 
 ##### Controller 层代码
+
 ```java
 @AllArgsConstructor
 @RestController
@@ -182,6 +195,7 @@ public class Application {
 ### 验证结果
 
 编写测试用例
+
 ```java
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
@@ -236,10 +250,11 @@ public class UserTest {
 
 ### 源码地址
 
-本章源码 : <https://gitee.com/gongm_24/spring-boot-tutorial.git>
+本章源码 : [https://github.com/lizhengdan/spring-boot-tutorial.git](https://github.com/lizhengdan/spring-boot-tutorial.git)
 
 ### 参考
- - <https://blog.52itstyle.vip/archives/1264/>
+
+- [https://blog.52itstyle.vip/archives/1264/](https://blog.52itstyle.vip/archives/1264/)
 
 ### 结束语
 
@@ -248,8 +263,11 @@ public class UserTest {
 在扩展中，还将介绍使用模板进行邮件内容的组织。
 
 ### 扩展
+
 #### 使用 Freemarker 模板
+
 ##### 添加依赖
+
 ```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
@@ -258,7 +276,9 @@ public class UserTest {
 ```
 
 ##### 配置
+
 在 application.yml 中进行配置，配置了 freemarker 模板文件的位置
+
 ```yaml
 spring
   freemarker:
@@ -266,6 +286,7 @@ spring
 ```
 
 ##### Service 发送方法代码
+
 ```java
 public void sendFreemarker(Mail mail) throws Exception {
     MimeMessage message = mailSender.createMimeMessage();
@@ -282,6 +303,7 @@ public void sendFreemarker(Mail mail) throws Exception {
 ```
 
 ##### Controller 方法代码
+
 ```java
 @PostMapping("/sendFreemarkerTpl")
 public String sendFreemarkerTpl(@RequestBody Mail mail) {
@@ -293,7 +315,9 @@ public String sendFreemarkerTpl(@RequestBody Mail mail) {
     return "OK";
 }
 ```
+
 ##### 测试用例
+
 ```java
 @Test
 public void testSendFreemarker() throws Exception {
@@ -312,17 +336,21 @@ public void testSendFreemarker() throws Exception {
 }
 ```
 
-
 #### 使用 thymeleaf 模板
+
 ##### 添加依赖
+
 ```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-thymeleaf</artifactId>
 </dependency>
 ```
+
 ##### 配置
+
 在 application.yml 中进行配置，配置了 thymeleaf 模板文件的位置，注意最后的反斜杠，一定不能少
+
 ```yaml
 spring
   thymeleaf:
@@ -330,6 +358,7 @@ spring
 ```
 
 ##### Service 发送方法代码
+
 ```java
 public void sendThymeleaf(Mail mail) throws Exception {
     MimeMessage message = mailSender.createMimeMessage();
@@ -348,6 +377,7 @@ public void sendThymeleaf(Mail mail) throws Exception {
 ```
 
 ##### Controller 方法代码
+
 ```java
 @PostMapping("/sendThymeleaf")
 public String sendThymeleaf(@RequestBody Mail mail) {
@@ -359,7 +389,9 @@ public String sendThymeleaf(@RequestBody Mail mail) {
     return "OK";
 }
 ```
+
 ##### 测试用例
+
 ```java
 @Test
 public void testSendThymeleaf() throws Exception {

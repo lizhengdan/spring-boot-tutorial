@@ -1,19 +1,21 @@
 整合RabbitMQ实现定时邮件发送
----
+----------------------------
 
 通过前面的文章，我们学习了 RabbitMQ 的基本使用，及死信队列和延迟队列的使用
 
- - [第十七章：整合RabbitMQ之ACK消息确认](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter17)
- - [第十八章：整合RabbitMQ之死信队列](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter18)
- - [第十九章：整合RabbitMQ之实现延迟队列](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter18/README_DELAY.md)
+- [第十七章：整合RabbitMQ之ACK消息确认](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter17)
+- [第十八章：整合RabbitMQ之死信队列](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter18)
+- [第十九章：整合RabbitMQ之实现延迟队列](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter18/README_DELAY.md)
 
 本章将结合前面的内容，完成一个完整的示例。
 
 ### 目标
+
 整合 RabbitMQ 及 Mail 实现异步发送邮件及定时发送邮件。
 
 流程如下：
-```mermaid 
+
+```mermaid
 flowchat
 st=>start: 客户端发送邮件
 e=>end: 消费消息
@@ -31,8 +33,11 @@ cond2(yes)->op3->e
 ```
 
 ### 操作步骤
+
 #### 添加依赖
+
 引入 Spring Boot Starter 父工程
+
 ```xml
 <parent>
     <groupId>org.springframework.boot</groupId>
@@ -42,6 +47,7 @@ cond2(yes)->op3->e
 ```
 
 添加 RabbitMQ 及 Mail 的依赖
+
 ```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
@@ -55,6 +61,7 @@ cond2(yes)->op3->e
 ```
 
 添加后的整体依赖如下
+
 ```xml
 <dependencies>
     <dependency>
@@ -72,7 +79,7 @@ cond2(yes)->op3->e
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-amqp</artifactId>
     </dependency>
-    
+  
     <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-mail</artifactId>
@@ -87,9 +94,11 @@ cond2(yes)->op3->e
 ```
 
 #### 编码(消费方)
+
 消费方监听队列 `EmailQueue`，实现发送邮件
 
 ##### 配置
+
 ```yaml
 spring:
   rabbitmq:
@@ -112,6 +121,7 @@ spring:
 ```
 
 ##### 定义队列
+
 ```java
 @Configuration
 public class MqConfig {
@@ -124,6 +134,7 @@ public class MqConfig {
 ```
 
 ##### 监听队列实现邮件发送
+
 ```java
 @AllArgsConstructor
 @Component
@@ -159,7 +170,9 @@ public class EmailConsumer {
 ```
 
 #### 编码(发送方)
+
 ##### 配置
+
 ```yaml
 spring:
   rabbitmq:
@@ -168,9 +181,12 @@ spring:
     username: admin
     password: admin
 ```
+
 ##### 定义队列
+
 定义一个邮件队列，消费端监听该队列，实现邮件异步发送
 定义一个延迟邮件队列，该队列中的消息到期则自动转入邮件队列。
+
 ```java
 @Configuration
 public class MqConfig {
@@ -212,6 +228,7 @@ public class MqConfig {
 ```
 
 ##### Service 层代码
+
 ```java
 @AllArgsConstructor
 @Service
@@ -243,5 +260,5 @@ public class MailService {
 ```
 
 ### 源码地址
-本章源码 : <https://gitee.com/gongm_24/spring-boot-tutorial.git>
 
+本章源码 : [https://github.com/lizhengdan/spring-boot-tutorial.git](https://github.com/lizhengdan/spring-boot-tutorial.git)

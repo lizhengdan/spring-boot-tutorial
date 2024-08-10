@@ -1,41 +1,47 @@
 整合SpringSecurity之基于SpEL表达式实现动态方法鉴权
----
+--------------------------------------------------
 
 通过前面的文章，我们已经实现了基于数据进行登录鉴权及基于注解的方式进行方法鉴权
 
- - [第二十四章：整合SpringSecurity之最简登录及方法鉴权](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter24)
- - [第二十五章：整合SpringSecurity之基于数据库实现登录鉴权](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter25)
- - [第二十六章：整合SpringSecurity之前后端分离使用JSON格式交互](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter26)
- - [第二十七章：整合SpringSecurity之前后端分离使用Token实现登录鉴权](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter27)
- - [第二十八章：整合SpringSecurity之前后端分离使用JWT实现登录鉴权](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter28)
+- [第二十四章：整合SpringSecurity之最简登录及方法鉴权](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter24)
+- [第二十五章：整合SpringSecurity之基于数据库实现登录鉴权](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter25)
+- [第二十六章：整合SpringSecurity之前后端分离使用JSON格式交互](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter26)
+- [第二十七章：整合SpringSecurity之前后端分离使用Token实现登录鉴权](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter27)
+- [第二十八章：整合SpringSecurity之前后端分离使用JWT实现登录鉴权](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter28)
 
 注解方式的方法鉴权：
 通过 `@EnableGlobalMethodSecurity` 注解来开启方法鉴权。
- - securedEnabled：开启 @Secured 注解
-    - 单个角色：@Secured("ROLE_USER")
-    - 多个角色任意一个：@Secured({"ROLE_USER","ROLE_ADMIN"})
- - prePostEnabled：开启 @PreAuthorize 及 @PostAuthorize 注解，分别适用于进入方法前后进行鉴权，支持表达式
-    - 允许所有访问：@PreAuthorize("true")
-    - 拒绝所有访问：@PreAuthorize("false")
-    - 单个角色：@PreAuthorize("hasRole('ROLE_USER')")
-    - 多个角色与条件：@PreAuthorize("hasRole('ROLE_USER') AND hasRole('ROLE_ADMIN')")
-    - 多个角色或条件：@PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")
- - jsr250Enabled：开启 JSR-250 相关注解
-    - 允许所有访问：@PermitAll
-    - 拒绝所有访问：@DenyAll
-    - 多个角色任意一个：@RolesAllowed({"ROLE_USER", "ROLE_ADMIN"})
+
+- securedEnabled：开启 @Secured 注解
+  - 单个角色：@Secured("ROLE_USER")
+  - 多个角色任意一个：@Secured({"ROLE_USER","ROLE_ADMIN"})
+- prePostEnabled：开启 @PreAuthorize 及 @PostAuthorize 注解，分别适用于进入方法前后进行鉴权，支持表达式
+  - 允许所有访问：@PreAuthorize("true")
+  - 拒绝所有访问：@PreAuthorize("false")
+  - 单个角色：@PreAuthorize("hasRole('ROLE_USER')")
+  - 多个角色与条件：@PreAuthorize("hasRole('ROLE_USER') AND hasRole('ROLE_ADMIN')")
+  - 多个角色或条件：@PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN')")
+- jsr250Enabled：开启 JSR-250 相关注解
+  - 允许所有访问：@PermitAll
+  - 拒绝所有访问：@DenyAll
+  - 多个角色任意一个：@RolesAllowed({"ROLE_USER", "ROLE_ADMIN"})
 
 虽然非常灵活，但是毕竟是硬编码，不符合实际的生产需求，在项目中，每个角色的可访问权限必须是可调整的，一般情况下使用数据库进行持久化。
 
 ### 目标
+
 整合 SpringSecurity 及 MybatisPlus 实现使用读取数据库数据进行方法鉴权
 
 ### 思路
+
 使用配置类的 HttpSecurity 提供的 access 方法，通过扩展SpEL表达式，实现自定义鉴权
+
 ```
 .access("@authService.canAccess(request, authentication)")
 ```
+
 其中 authService 是 Spring 容器中的 Bean，canAccess 是其中的一个方法。
+
 ```java
 @Service
 public class AuthService {
@@ -47,6 +53,7 @@ public class AuthService {
 ```
 
 ### 准备工作
+
 创建用户表 `user`、角色表 `role`、用户角色关系表 `user_role`，资源表 `resource`，资源角色关系表 `role_resource`
 
 ```mysql
@@ -88,8 +95,11 @@ CREATE TABLE `role_resource` (
 ```
 
 ### 操作步骤
+
 #### 添加依赖
+
 引入 Spring Boot Starter 父工程
+
 ```xml
 <parent>
     <groupId>org.springframework.boot</groupId>
@@ -99,6 +109,7 @@ CREATE TABLE `role_resource` (
 ```
 
 添加 `springSecurity` 及 `mybatisPlus` 的依赖，添加后的整体依赖如下
+
 ```xml
 <dependencies>
     <dependency>
@@ -135,8 +146,11 @@ CREATE TABLE `role_resource` (
     </dependency>
 </dependencies>
 ```
+
 #### 配置
+
 配置一下数据源
+
 ```yaml
 spring:
   datasource:
@@ -144,11 +158,15 @@ spring:
     username: app
     password: 123456
 ```
+
 #### 编码
+
 用户登录相关代码请参考 [第二十五章：整合SpringSecurity之使用数据库实现登录鉴权](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter25)，这里不再粘贴。
 
 ##### 实体类
+
 角色实体类 Role，实现权限接口 GrantedAuthority
+
 ```java
 @Data
 @NoArgsConstructor
@@ -166,7 +184,9 @@ public class Role implements GrantedAuthority {
     }
 }
 ```
+
 资源实体
+
 ```java
 @Data
 @NoArgsConstructor
@@ -180,7 +200,9 @@ public class Resource {
 
 }
 ```
+
 资源角色关系实体
+
 ```java
 @Data
 @NoArgsConstructor
@@ -195,8 +217,11 @@ public class RoleResource {
 
 }
 ```
+
 ##### Repository 层
+
 分别为三个实体类添加 Mapper
+
 ```java
 @Mapper
 public interface RoleRepository extends BaseMapper<Role> {
@@ -208,7 +233,9 @@ public interface ResourceRepository extends BaseMapper<Resource> {
 public interface RoleResourceRepository extends BaseMapper<RoleResource> {
 }
 ```
+
 ##### 实现自定义方法鉴权
+
 ```java
 @Service
 @AllArgsConstructor
@@ -256,7 +283,9 @@ public class AuthService {
 ```
 
 ##### 注册配置
+
 不用再声明 `@EnableGlobalMethodSecurity` 注解，注册自定义鉴权方法 `authService.canAccess`。
+
 ```java
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
@@ -287,6 +316,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 ```
 
 ##### 去掉原来的方法鉴权相关注解
+
 ```java
 @RestController
 public class HelloController {
@@ -318,6 +348,7 @@ public class HelloController {
 ```
 
 ##### 启动类
+
 ```java
 @SpringBootApplication
 public class Application {
@@ -328,9 +359,13 @@ public class Application {
 
 }
 ```
+
 #### 验证结果
+
 ##### 初始化数据
+
 执行测试用例进行初始化数据
+
 ```java
 @Slf4j
 @RunWith(SpringRunner.class)
@@ -380,11 +415,12 @@ public class SecurityTest {
 ```
 
 ##### 校验
+
 使用 `admin` 登录可以访问 `/hello` 及 `/secure`，使用 `user` 登录则只能访问 `/hello`
 
 ### 源码地址
 
-本章源码 : <https://gitee.com/gongm_24/spring-boot-tutorial.git>
+本章源码 : [https://github.com/lizhengdan/spring-boot-tutorial.git](https://github.com/lizhengdan/spring-boot-tutorial.git)
 
 ### 参考
 

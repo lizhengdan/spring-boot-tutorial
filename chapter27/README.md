@@ -1,18 +1,19 @@
 整合SpringSecurity之前后端分离使用Token实现登录鉴权
----
+---------------------------------------------------
 
 通过前一篇文章，我们已经实现了前后端分离模式下，使用JSON数据进行前后端交互
 
- - [第二十四章：整合SpringSecurity之最简登录及方法鉴权](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter24)
- - [第二十五章：整合SpringSecurity之基于数据库实现登录鉴权](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter25)
- - [第二十六章：整合SpringSecurity之前后端分离使用JSON格式交互](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter26)
+- [第二十四章：整合SpringSecurity之最简登录及方法鉴权](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter24)
+- [第二十五章：整合SpringSecurity之基于数据库实现登录鉴权](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter25)
+- [第二十六章：整合SpringSecurity之前后端分离使用JSON格式交互](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter26)
 
 主要涉及到
- - 实现 `AbstractAuthenticationProcessingFilter` 接口，接收JSON格式登录表单数据，执行登录校验
- - 实现 `AuthenticationSuccessHandler` 接口，登录成功，返回JSON格式信息
- - 实现 `AuthenticationFailureHandler` 接口，登录失败，返回JSON格式错误信息
- - 实现 `AccessDeniedHandler` 接口，登录成功，但无资源访问权限时，返回JSON格式错误信息
- - 实现 `AuthenticationEntryPoint` 接口，未登录访问资源时，返回JSON格式错误信息
+
+- 实现 `AbstractAuthenticationProcessingFilter` 接口，接收JSON格式登录表单数据，执行登录校验
+- 实现 `AuthenticationSuccessHandler` 接口，登录成功，返回JSON格式信息
+- 实现 `AuthenticationFailureHandler` 接口，登录失败，返回JSON格式错误信息
+- 实现 `AccessDeniedHandler` 接口，登录成功，但无资源访问权限时，返回JSON格式错误信息
+- 实现 `AuthenticationEntryPoint` 接口，未登录访问资源时，返回JSON格式错误信息
 
 要实现前后端分离，还有一个重要的环节就是存储用户登录状态，
 在前一篇文章中，虽然我们实现的JSON格式交互，但是依然使用 session 存储用户登录状态，
@@ -25,12 +26,15 @@
 服务端接收到请求，对该 token 进行校验，判断请求用户登录状态，获取权限信息，实现权限校验。
 
 ### 目标
+
 整合 SpringSecurity 实现使用 token 进行鉴权。
 
 ### 思路
+
 分成两个部分，第一部分是登录，客户端向服务端发起登录请求时，
 服务端需要生成token并存储起来，然后将token分发给客户端，客户端需要自行存储该token。
 流程图：
+
 ```mermaid
 sequenceDiagram
 客户端 ->> 服务端: 提交表单
@@ -38,9 +42,11 @@ sequenceDiagram
 服务端 ->> 数据库: 存储token
 服务端 ->> 客户端: 分发token
 ```
+
 在第二部分是登录成功后，访问资源时，客户端需要将登录时收到的token，附加在请求中，发送给服务端，
 服务端需要判断该token的有效性，并通过该token，可以获取到当前用户信息。
 流程图：
+
 ```mermaid
 sequenceDiagram
 客户端 ->> 服务端: 访问资源
@@ -52,6 +58,7 @@ sequenceDiagram
 > 本文使用数据库存储token，实际项目中会使用 redis 之类的更高效的存储
 
 ### 准备工作
+
 创建用户表 `user`、角色表 `role`、用户角色关系表 `user_role` 及 `token` 表
 
 ```mysql
@@ -85,8 +92,11 @@ CREATE TABLE `token` (
 ```
 
 ### 操作步骤
+
 #### 添加依赖
+
 引入 Spring Boot Starter 父工程
+
 ```xml
 <parent>
     <groupId>org.springframework.boot</groupId>
@@ -96,6 +106,7 @@ CREATE TABLE `token` (
 ```
 
 添加 `springSecurity` 及 `mybatisPlus` 的依赖，添加后的整体依赖如下
+
 ```xml
 <dependencies>
     <dependency>
@@ -132,8 +143,11 @@ CREATE TABLE `token` (
     </dependency>
 </dependencies>
 ```
+
 #### 配置
+
 配置一下数据源
+
 ```yaml
 spring:
   datasource:
@@ -141,9 +155,13 @@ spring:
     username: app
     password: 123456
 ```
+
 #### 编码
+
 ##### 实体类
+
 角色实体类 Role，实现权限接口 GrantedAuthority
+
 ```java
 @Data
 @NoArgsConstructor
@@ -161,7 +179,9 @@ public class Role implements GrantedAuthority {
     }
 }
 ```
+
 用户实体类 user，实现权限接口 UserDetails，主要方法是 getAuthorities，用于获取用户的角色列表
+
 ```java
 @Data
 @NoArgsConstructor
@@ -205,7 +225,9 @@ public class User implements UserDetails {
 
 }
 ```
+
 用户角色关系实体
+
 ```java
 @Data
 @NoArgsConstructor
@@ -218,7 +240,9 @@ public class UserRole {
     private Long roleId;
 }
 ```
+
 Token实体
+
 ```java
 @Data
 @TableName("token")
@@ -229,8 +253,11 @@ public class Token {
     private Long userId;
 }
 ```
+
 ##### Repository 层
+
 分别为四个实体类添加 Mapper
+
 ```java
 @Mapper
 public interface RoleRepository extends BaseMapper<Role> {
@@ -245,9 +272,13 @@ public interface UserRoleRepository extends BaseMapper<UserRole> {
 public interface TokenRepository extends BaseMapper<Token> {
 }
 ```
+
 #### 权限配置
+
 ##### 实现 UserDetailsService 接口
+
 UserDetailsService 是 SpringSecurity 提供的登陆时用于根据用户名获取用户信息的接口
+
 ```java
 @AllArgsConstructor
 @Service
@@ -284,6 +315,7 @@ public class UserService implements UserDetailsService {
 ```
 
 ##### 自定义登录参数格式
+
 ```java
 @Data
 public class LoginDto {
@@ -296,9 +328,11 @@ public class LoginDto {
 ```
 
 ##### 自定义登录鉴权过滤器
+
 继承 SpringSecurity 提供的 AbstractAuthenticationProcessingFilter 类，实现 attemptAuthentication 方法，用于登录校验。
 本例中，模拟前端使用 json 格式传递参数，所以通过 objectMapper.readValue 的方式从流中获取入参，之后借用了用户名密码登录的校验，
 如果鉴权成功，则生成 token 存库并将 token 返回给前端。
+
 ```java
 @Data
 public class JsonAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
@@ -340,7 +374,9 @@ public class JsonAuthenticationFilter extends AbstractAuthenticationProcessingFi
 ```
 
 ##### 自定义登陆成功后处理
+
 实现 SpringSecurity 提供的 AuthenticationSuccessHandler 接口，使用 JSON 格式返回
+
 ```java
 @AllArgsConstructor
 public class JsonLoginSuccessHandler implements AuthenticationSuccessHandler {
@@ -359,7 +395,9 @@ public class JsonLoginSuccessHandler implements AuthenticationSuccessHandler {
 ```
 
 ##### 自定义登陆失败后处理
+
 实现 SpringSecurity 提供的 AuthenticationFailureHandler 接口，使用 JSON 格式返回
+
 ```java
 public class JsonLoginFailureHandler implements AuthenticationFailureHandler {
 
@@ -375,8 +413,10 @@ public class JsonLoginFailureHandler implements AuthenticationFailureHandler {
 ```
 
 ##### 自定义权限校验失败后处理
+
 登陆成功之后，访问接口之前 SpringSecurity 会进行鉴权，如果没有访问权限，需要对返回进行处理。
 实现 SpringSecurity 提供的 AccessDeniedHandler 接口，使用 JSON 格式返回
+
 ```java
 public class JsonAccessDeniedHandler implements AccessDeniedHandler {
 
@@ -392,7 +432,9 @@ public class JsonAccessDeniedHandler implements AccessDeniedHandler {
 ```
 
 ##### 自定义未登录后处理
+
 实现 SpringSecurity 提供的 AuthenticationEntryPoint 接口，使用 JSON 格式返回
+
 ```java
 public class JsonAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
@@ -408,8 +450,10 @@ public class JsonAuthenticationEntryPoint implements AuthenticationEntryPoint {
 ```
 
 ##### 自定义 Token 验证过滤器
+
 客户端登录成功时，后台会把生成的 token 返回给前端，之后客户端每次请求后台接口将会把这个 token 附在 header 头中传递给后台，
 后台会验证这个 token 是否有效，如果有效就把用户信息加载至 SpringSecurity 中，如果无效则会跳转至上一步提供 AuthenticationEntryPoint 进行处理。
+
 ```java
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
@@ -460,8 +504,10 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 ```
 
 ##### 注册
+
 在 configure 方法中将自定义的 jsonAuthenticationFilter 及 tokenAuthenticationFilter 注册进 SpringSecurity 的过滤器链中，
 并禁用 session。
+
 ```java
 @Configuration
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true, jsr250Enabled = true)
@@ -518,6 +564,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 ```
 
 #### 启动类
+
 ```java
 @SpringBootApplication
 public class Application {
@@ -528,9 +575,13 @@ public class Application {
 
 }
 ```
+
 ### 验证结果
+
 #### 初始化数据
+
 执行测试用例进行初始化数据
+
 ```java
 @Slf4j
 @RunWith(SpringRunner.class)
@@ -572,5 +623,4 @@ public class SecurityTest {
 
 ### 源码地址
 
-本章源码 : <https://gitee.com/gongm_24/spring-boot-tutorial.git>
-
+本章源码 : [https://github.com/lizhengdan/spring-boot-tutorial.git](https://github.com/lizhengdan/spring-boot-tutorial.git)

@@ -1,18 +1,19 @@
 整合Lombok让项目更简洁
----
+----------------------
 
 在常规的实体类中，我们会对该类中所有字段生成 get / set 方法，遇到字段比较多的，这些方法会占用大量代码篇幅。
 Lombok 就是为了简化此类代码。
 
 ### 相关知识
 
-Lombok官网：<https://projectlombok.org/>
+Lombok官网：[https://projectlombok.org/](https://projectlombok.org/)
 
 #### 常用注解
 
 一、@Setter | @Getter
 
 提供无参构造方法以及 getter、setter 方法
+
 ```
 @Getter
 @Setter
@@ -26,9 +27,10 @@ public class User1 {
 
 提供无参构造方法以及 toString 方法
 
- - includeFieldNames 是否包含属性名
- - exclude 排除指定属性
- - callSuper 是否包含父类属性
+- includeFieldNames 是否包含属性名
+- exclude 排除指定属性
+- callSuper 是否包含父类属性
+
 ```
 @ToString
 public class User2 {
@@ -40,6 +42,7 @@ public class User2 {
 三、@EqualsAndHashCode
 
 提供无参构造方法以及 equals、hashCode 方法
+
 ```
 @EqualsAndHashCode
 public class User3 {
@@ -51,6 +54,7 @@ public class User3 {
 四、@AllArgsConstructor
 
 提供一个全参数的构造方法，默认不提供无参构造
+
 ```
 @AllArgsConstructor
 public class User4 {
@@ -62,6 +66,7 @@ public class User4 {
 五、@NoArgsConstructor
 
 提供一个无参构造
+
 ```
 @NoArgsConstructor
 public class User5 {
@@ -73,7 +78,9 @@ public class User5 {
 六、@Data
 
 结合了@ToString，@EqualsAndHashCode，@Getter、@Setter、@NoArgsConstructor
+
 - staticConstructor 生成静态工厂方法的方法名，如果设置了该参数，则生成的无参构造方法将被置为私有的。
+
 ```
 @Data
 public class User4 {
@@ -85,6 +92,7 @@ public class User4 {
 七、@Slf4j
 
 提供 org.slf4j.Logger 变量，变量名为 log
+
 ```
 @Slf4j
 @RestController
@@ -104,15 +112,18 @@ public class UserController {
 
 ### 准备工作
 
- - Idea 集成开发环境
+- Idea 集成开发环境
 
 #### 安装 lombok 插件
 
 File -> settings，打开 Idea 的设置界面，从左侧栏选择 Plugins 选项，再在右侧查询 lombok，点击安装。
 
 ### 操作步骤
+
 #### 添加依赖
+
 引入 Spring Boot Starter 父工程
+
 ```xml
 <parent>
     <groupId>org.springframework.boot</groupId>
@@ -122,6 +133,7 @@ File -> settings，打开 Idea 的设置界面，从左侧栏选择 Plugins 选�
 ```
 
 添加 `lombok` 的依赖
+
 ```xml
 <dependency>
     <groupId>org.projectlombok</groupId>
@@ -131,6 +143,7 @@ File -> settings，打开 Idea 的设置界面，从左侧栏选择 Plugins 选�
 ```
 
 同时添加对 `spring-boot-starter-test` 的依赖，用于进行单元测试，完整依赖如下
+
 ```xml
 <dependencies>
     <dependency>
@@ -174,11 +187,13 @@ File -> settings，打开 Idea 的设置界面，从左侧栏选择 Plugins 选�
 ```
 
 #### 编码
+
 1. Entity 代码
 
 将 User 类的 get / set 方法全部删除，在类上添加注解 @Data。
 
 修改前：
+
 ```java
 @Entity
 public class User {
@@ -226,6 +241,7 @@ public class User {
 ```
 
 修改后的代码如下，去除了所有 get/set 方法，代码变得简洁，方便后期阅读及修改
+
 ```java
 @Data
 @Entity
@@ -243,14 +259,17 @@ public class User {
 ```
 
 2. Repository 层代码
+
 ```java
 public interface UserRepository extends JpaRepository<User, Long> {
 }
 ```
 
 3. Controller 层代码
- - 添加 @Slf4j 注解，使用 `log.debug` 进行日志打印
- - 添加 @AllArgsConstructor 注解，同时去除 UserRepository 属性上的 @Autowired 注解，使用 Spring 推荐的构造方法注入
+
+- 添加 @Slf4j 注解，使用 `log.debug` 进行日志打印
+- 添加 @AllArgsConstructor 注解，同时去除 UserRepository 属性上的 @Autowired 注解，使用 Spring 推荐的构造方法注入
+
 ```java
 @Slf4j
 @AllArgsConstructor
@@ -290,6 +309,7 @@ public class UserController {
 ```
 
 4. 启动类
+
 ```java
 @SpringBootApplication
 public class Application {
@@ -302,7 +322,9 @@ public class Application {
 ```
 
 ### 验证结果
+
 编写测试用例
+
 ```java
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
@@ -345,7 +367,7 @@ public class UserTest {
 
 ### 源码地址
 
-本章源码 : <https://gitee.com/gongm_24/spring-boot-tutorial.git>
+本章源码 : [https://github.com/lizhengdan/spring-boot-tutorial.git](https://github.com/lizhengdan/spring-boot-tutorial.git)
 
 ### 结束语
 

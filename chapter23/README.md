@@ -1,25 +1,29 @@
 整合Redis之实现缓存让程序加速起飞
----
+---------------------------------
 
 写在前面的文章
 
- - [第二十一章：整合Redis之最简配置](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter21)
- - [第二十二章：整合Redis之实现分布式锁](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter22)
+- [第二十一章：整合Redis之最简配置](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter21)
+- [第二十二章：整合Redis之实现分布式锁](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter22)
 
 ### 相关知识
+
 #### 常用 Spring Cache 缓存注解
 
- - @CacheConfig 在类上设置当前缓存的一些公共设置，比如缓存名称。
- - @Cacheable   作用在方法上，表明该方法的结果可以缓存，如果缓存存在，则目标方法不会被调用，直接从缓存中获取，如果缓存不存在，则执行方法体，并将结果存入缓存。
- - @CacheEvice  作用在方法上，删除缓存项或者清空缓存。
- - @CachePut    作用在方法上，不管缓存是否存在，都会执行方法体，并将结果存入缓存。
- - @Caching     作用在方法上，以上的注解如果需要同时注解多个，可以包在 @Caching 内
+- @CacheConfig 在类上设置当前缓存的一些公共设置，比如缓存名称。
+- @Cacheable   作用在方法上，表明该方法的结果可以缓存，如果缓存存在，则目标方法不会被调用，直接从缓存中获取，如果缓存不存在，则执行方法体，并将结果存入缓存。
+- @CacheEvice  作用在方法上，删除缓存项或者清空缓存。
+- @CachePut    作用在方法上，不管缓存是否存在，都会执行方法体，并将结果存入缓存。
+- @Caching     作用在方法上，以上的注解如果需要同时注解多个，可以包在 @Caching 内
 
 ### 目标
+
 整合 Redis 实现对 redis 的增删查改
 
 ### 准备工作
+
 #### 创建表
+
 ```mysql
 CREATE TABLE `user` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -30,8 +34,11 @@ CREATE TABLE `user` (
 ```
 
 ### 操作步骤
+
 #### 添加依赖
+
 引入 Spring Boot Starter 父工程
+
 ```xml
 <parent>
     <groupId>org.springframework.boot</groupId>
@@ -41,6 +48,7 @@ CREATE TABLE `user` (
 ```
 
 添加 `redis`、`jpa` 及 `mysql` 的依赖，添加后的整体依赖如下
+
 ```xml
 <dependencies>
     <dependency>
@@ -88,7 +96,9 @@ CREATE TABLE `user` (
 ```
 
 #### 配置
+
 属性 `spring.cache.type` 用于配置缓存类型，默认为 `simple`，配置使用 redis 作为缓存中间件，只需要配置 `spring.cache.type` 属性为 `redis` 即可
+
 ```yaml
 spring:
   cache:
@@ -125,8 +135,11 @@ spring:
 ```
 
 #### 编码
+
 ##### 实体对象
+
 因为 Redis 初始化时，默认使用的序列化类是 JdkSerializationRedisSerializer，所以需要实体对象实现 Serializable 接口。
+
 ```java
 @Data
 @Entity
@@ -142,13 +155,16 @@ public class User implements Serializable {
 ```
 
 ##### Repository 层代码
+
 ```java
 public interface UserRepository extends JpaRepository<User, Long> {
 }
 ```
 
 ##### Service 层代码
+
 对增删查改方法添加缓存注解
+
 ```java
 @CacheConfig(cacheNames = "user")
 @Service
@@ -183,7 +199,9 @@ public class UserService {
 ```
 
 ##### 启动类
+
 在启动类上添加 @EnableCaching 注解，用于开启缓存
+
 ```java
 @EnableCaching
 @SpringBootApplication
@@ -197,7 +215,9 @@ public class Application {
 ```
 
 ### 验证结果
+
 编写测试用例
+
 ```java
 @Slf4j
 @RunWith(SpringRunner.class)
@@ -224,6 +244,7 @@ public class CacheTest {
 ```
 
 将 UserService 中的缓存相关注解全部注释，执行测试用例，日志显示如下：
+
 ```
 执行数据新增，新增时会根据ID缓存用户对象
 Hibernate: insert into user (password, username) values (?, ?)
@@ -233,6 +254,7 @@ Hibernate: select user0_.id as id1_0_0_, user0_.password as password2_0_0_, user
 ```
 
 恢复缓存注解，再次执行测试用例，日志显示如下：
+
 ```
 执行数据新增，新增时会根据ID缓存用户对象
 Hibernate: insert into user (password, username) values (?, ?)
@@ -246,19 +268,24 @@ Hibernate: insert into user (password, username) values (?, ?)
 
 ### 源码地址
 
-本章源码 : <https://gitee.com/gongm_24/spring-boot-tutorial.git>
+本章源码 : [https://github.com/lizhengdan/spring-boot-tutorial.git](https://github.com/lizhengdan/spring-boot-tutorial.git)
 
 ### 结束语
+
 数据库一直都是系统高性能的一个瓶颈，合理正确地使用缓存，可以大大提升系统性能。
 但是随之而来的是系统复杂度提高，有更多的问题需要处理，比如缓存一致性，缓存穿透，缓存雪崩等。
 
 ### 参考
- - <https://blog.battcn.com/2018/05/13/springboot/v2-cache-redis/>
+
+- [https://blog.battcn.com/2018/05/13/springboot/v2-cache-redis/](https://blog.battcn.com/2018/05/13/springboot/v2-cache-redis/)
 
 ### 扩展
+
 #### 根据条件操作缓存
+
 根据条件操作缓存内容并不影响数据库操作，条件表达式返回一个布尔值，true/false，当条件为true，则进行缓存操作，否则直接调用方法执行的返回结果。
- - 长度： @CachePut(value = "user", key = "#user.id",condition = "#user.username.length() < 10") 只缓存用户名长度少于10的数据
- - 大小： @Cacheable(value = "user", key = "#id",condition = "#id < 10") 只缓存ID小于10的数据
- - 组合： @Cacheable(value="user",key="#user.username.concat(##user.password)")
- - 提前操作： @CacheEvict(value="user",allEntries=true,beforeInvocation=true) 加上beforeInvocation=true后，不管内部是否报错，缓存都将被清除，默认情况为false
+
+- 长度： @CachePut(value = "user", key = "#user.id",condition = "#user.username.length() < 10") 只缓存用户名长度少于10的数据
+- 大小： @Cacheable(value = "user", key = "#id",condition = "#id < 10") 只缓存ID小于10的数据
+- 组合： @Cacheable(value="user",key="#user.username.concat(##user.password)")
+- 提前操作： @CacheEvict(value="user",allEntries=true,beforeInvocation=true) 加上beforeInvocation=true后，不管内部是否报错，缓存都将被清除，默认情况为false

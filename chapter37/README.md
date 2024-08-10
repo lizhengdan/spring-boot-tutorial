@@ -1,23 +1,31 @@
 整合Kafka之入门
----
+---------------
 
 ### 目标
+
 整合 Kafka，实现创建 topic，向 topic 发送消息并消费
 
 ### 准备工作
+
 #### 安装
+
 使用 Docker 进行简单安装
+
 ##### 拉取镜像
+
 ```
 docker pull zookeeper;
 docker pull wurstmeister/kafka;
 ```
+
 ##### 启动 Zookeeper
+
 ```
 docker run -d -p 2181:2181 --name zk --restart always zookeeper
 ```
 
 #### 启动 Kafka
+
 ```
 docker run -d -p 9092:9092 \
     --name kafka \
@@ -30,8 +38,11 @@ docker run -d -p 9092:9092 \
 ```
 
 ### 操作步骤
+
 #### 添加依赖
+
 引入 Spring Boot Starter 父工程
+
 ```xml
 <parent>
     <groupId>org.springframework.boot</groupId>
@@ -39,7 +50,9 @@ docker run -d -p 9092:9092 \
     <version>2.0.5.RELEASE</version>
 </parent>
 ```
+
 添加 `elastic-job-lite` 的依赖，本文使用的版本是 `2.1.5`，添加后的整体依赖如下
+
 ```xml
 <dependencies>
     <dependency>
@@ -52,7 +65,7 @@ docker run -d -p 9092:9092 \
         <artifactId>spring-boot-starter-test</artifactId>
         <scope>test</scope>
     </dependency>
-    
+  
     <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
@@ -74,7 +87,9 @@ docker run -d -p 9092:9092 \
 ```
 
 #### 配置
+
 因为 SpringBoot 并没有提供 ElasticJob 的相关 starter，所以配置参数需要我们自行定义
+
 ```yaml
 zookeeper:
   url: 127.0.0.1:2181
@@ -82,7 +97,9 @@ zookeeper:
 ```
 
 #### 编码
+
 ##### 编写定时任务执行类
+
 需要实现 `SimpleJob` 接口
 
 ```java
@@ -105,7 +122,9 @@ public class ExampleJob implements SimpleJob {
 ```
 
 ##### 注册 Zookeeper
+
 使用前面的配置进行注册
+
 ```java
 @Configuration
 protected class JobRegistryCenterConfig {
@@ -119,7 +138,9 @@ protected class JobRegistryCenterConfig {
 ```
 
 ##### 注册定时任务
+
 使用前面创建的 `ExampleJob` 进行注册 `JobScheduler`，并执行其 `init` 方法。
+
 ```java
 @Configuration
 @Import(JobRegistryCenterConfig.class)
@@ -160,6 +181,7 @@ protected class LiteJobConfig {
 ```
 
 ElasticJobProperties 类用于支持使用配置文件进行配置，因为使用了默认值，所以在配置文件中并没有进行相关配置
+
 ```java
 @Data
 @ConfigurationProperties(prefix = "elastic-job")
@@ -177,7 +199,9 @@ public class ElasticJobProperties {
 ```
 
 #### 验证
+
 启动项目，查看日志
+
 ```
 // 第一次
 Thread ID: 92, 作业分片总数: 3, 当前分片项: 0.当前参数: A,作业名称: com.mhkj.ExampleJob.作业自定义参数: parameter
@@ -191,10 +215,13 @@ Thread ID: 97, 作业分片总数: 3, 当前分片项: 2.当前参数: C,作业�
 ```
 
 ### 源码地址
-本章源码 : <https://gitee.com/gongm_24/spring-boot-tutorial.git>
+
+本章源码 : [https://github.com/lizhengdan/spring-boot-tutorial.git](https://github.com/lizhengdan/spring-boot-tutorial.git)
 
 ### 结束语
+
 将任务加入 Elastic-Job 的步骤就是
+
 ```java
 // 第一步：初始化注册中心
 CoordinatorRegistryCenter regCenter = ...;
@@ -205,8 +232,11 @@ new JobScheduler(regCenter, liteJobConfig).init();
 ```
 
 ### 扩展
+
 #### 开启事件追踪
+
 `Elastic-Job-Lite` 在提供了 `JobEventConfiguration`，目前支持数据库方式配置，操作步骤如下：
+
 ```java
 // 初始化数据源
 DataSource dataSource = ...;
@@ -222,26 +252,33 @@ new JobScheduler(regCenter, liteJobConfig, jobEventRdbConfig).init();
 需要配置一个数据源，配置之后，对应库自动创建 `JOB_EXECUTION_LOG` 和 `JOB_STATUS_TRACE_LOG` 两张表以及若干索引。
 
 #### 开启任务监听
+
 监听器分为每台作业节点均执行和分布式场景中仅单一节点执行2种。
+
 ##### 为每台作业节点均执行的监听
+
 若作业处理作业服务器的文件，处理完成后删除文件，可考虑使用每个节点均执行清理任务。
 此类型任务实现简单，且无需考虑全局分布式任务是否完成，请尽量使用此类型监听器。
- - 定义监听器
+
+- 定义监听器
+
 ```java
 public class MyElasticJobListener implements ElasticJobListener {
-    
+  
     @Override
     public void beforeJobExecuted(ShardingContexts shardingContexts) {
         // do something ...
     }
-    
+  
     @Override
     public void afterJobExecuted(ShardingContexts shardingContexts) {
         // do something ...
     }
 }
 ```
- - 将监听器作为参数传入JobScheduler
+
+- 将监听器作为参数传入JobScheduler
+
 ```java
 // 初始化注册中心
 CoordinatorRegistryCenter regCenter = ...;
@@ -251,28 +288,33 @@ new JobScheduler(regCenter, liteJobConfig, new MyElasticJobListener()).init();
 ```
 
 ##### 分布式场景中仅单一节点执行的监听
+
 若作业处理数据库数据，处理完成后只需一个节点完成数据清理任务即可。
 此类型任务处理复杂，需同步分布式环境下作业的状态同步，提供了超时设置来避免作业不同步导致的死锁，请谨慎使用。
- - 定义监听器
+
+- 定义监听器
+
 ```java
 public class DistributeOnceElasticJobListener extends AbstractDistributeOnceElasticJobListener {
-    
+  
     public DistributeOnceElasticJobListener(long startTimeoutMills, long completeTimeoutMills) {
         super(startTimeoutMills, completeTimeoutMills);
     }
-    
+  
     @Override
     public void doBeforeJobExecutedAtLastStarted(ShardingContexts shardingContexts) {
         // do something ...
     }
-    
+  
     @Override
     public void doAfterJobExecutedAtLastCompleted(ShardingContexts shardingContexts) {
         // do something ...
     }
 }
 ```
- - 将监听器作为参数传入JobScheduler
+
+- 将监听器作为参数传入JobScheduler
+
 ```java
 // 初始化注册中心
 CoordinatorRegistryCenter regCenter = ...;

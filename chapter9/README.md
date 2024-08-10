@@ -1,5 +1,5 @@
 全局异常处理统一格式输出
----
+------------------------
 
 在 [第八章：整合hibernate-validator优雅表单校验](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter8)，
 我们使用了 hibernate-validator 对参数进行校验，
@@ -11,9 +11,11 @@
 对 SpringBoot 项目中的所有异常进行响应，处理成统一的格式进行输出。
 
 ### 操作步骤
+
 #### 添加依赖
 
 引入 Spring Boot Starter 父工程
+
 ```xml
 <parent>
     <groupId>org.springframework.boot</groupId>
@@ -23,6 +25,7 @@
 ```
 
 整体依赖如下所示
+
 ```xml
 <dependencies>
     <dependency>
@@ -56,7 +59,9 @@
 ```
 
 ### 编码
+
 1. 构建统一输出类，作为项目所有接口的输出对象
+
 ```java
 @Getter
 @Setter
@@ -145,9 +150,11 @@ public class RestData<T> {
 ```
 
 2. 全局异常处理器
- - 类上添加 `@RestControllerAdvice` 注解，是 `@ResponseBody` 与 `@ControllerAdvice` 的结合，其中 `@ControllerAdvice` 用于注册异常处理器，而 `@ResponseBody` 用于标记该类中所有方法返回类型为 JSON。
- - 方法上添加 `@ExceptionHandler` 注解，用于标记该方法用于处理何种异常。
- - 该类中可以同时编写多个方法，用于处理多种异常，Spring 会自行根据异常类型选择执行相应的方法。
+
+- 类上添加 `@RestControllerAdvice` 注解，是 `@ResponseBody` 与 `@ControllerAdvice` 的结合，其中 `@ControllerAdvice` 用于注册异常处理器，而 `@ResponseBody` 用于标记该类中所有方法返回类型为 JSON。
+- 方法上添加 `@ExceptionHandler` 注解，用于标记该方法用于处理何种异常。
+- 该类中可以同时编写多个方法，用于处理多种异常，Spring 会自行根据异常类型选择执行相应的方法。
+
 ```java
 package com.mhkj.config;
 
@@ -200,6 +207,7 @@ public class RestExceptionHandler {
 ```
 
 3. Controller 层代码
+
 ```java
 @RestController
 public class UserController {
@@ -213,6 +221,7 @@ public class UserController {
 ```
 
 4. 启动类
+
 ```java
 @SpringBootApplication
 public class Application {
@@ -227,6 +236,7 @@ public class Application {
 ### 验证结果
 
 编写测试用例
+
 ```java
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
@@ -268,7 +278,7 @@ public class UserTest {
 
 ### 源码地址
 
-本章源码 : <https://gitee.com/gongm_24/spring-boot-tutorial.git>
+本章源码 : [https://github.com/lizhengdan/spring-boot-tutorial.git](https://github.com/lizhengdan/spring-boot-tutorial.git)
 
 ### 结束语
 

@@ -1,21 +1,25 @@
 整合RabbitMQ之死信队列
----
+----------------------
 
 前面的文章
 
- - [第十七章：整合RabbitMQ之ACK消息确认](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter17)
+- [第十七章：整合RabbitMQ之ACK消息确认](https://gitee.com/gongm_24/spring-boot-tutorial/tree/master/chapter17)
 
 ### 相关知识
+
 #### 什么是死信队列
+
 “死信”是RabbitMQ中的一种消息机制，当你在消费消息时，如果队列里的消息出现以下情况：
- - 消息被否定确认，使用 channel.basicNack 或 channel.basicReject ，并且此时requeue 属性被设置为false。
- - 消息在队列的存活时间超过设置的TTL时间。
- - 消息队列的消息数量已经超过最大队列长度。
+
+- 消息被否定确认，使用 channel.basicNack 或 channel.basicReject ，并且此时requeue 属性被设置为false。
+- 消息在队列的存活时间超过设置的TTL时间。
+- 消息队列的消息数量已经超过最大队列长度。
 
 那么该消息将成为“死信”，“死信”消息会被RabbitMQ进行特殊处理。
 如果配置了死信队列信息，那么该消息将会被丢进死信队列中，如果没有配置，则该消息将会被丢弃。
 
 #### 应用场景
+
 当一个队列中的消息必须要被正确消费，但是却无法被正确消费，有很多情况可能导致出现这个问题，
 可能是消息本身的数据导致业务无法通过校验，也可能是相关服务宕机导致，甚至可能只是网络波动导致。
 此时该消息不能确认，也不能丢弃，更不能一直 requeue，那将变成一个死循环，
@@ -23,11 +27,15 @@
 通过订阅死信队列可以对此类消息进行例外处理，例如通知相关人员检查数据进行人工处理。
 
 ### 目标
+
 整合 Spring boot 提供的 `spring-boot-starter-amqp`，实现消息消费失败转死信队列
 
 ### 操作步骤
+
 #### 添加依赖
+
 引入 Spring Boot Starter 父工程
+
 ```xml
 <parent>
     <groupId>org.springframework.boot</groupId>
@@ -37,6 +45,7 @@
 ```
 
 添加 `spring-boot-starter-amqp` 的依赖
+
 ```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
@@ -45,6 +54,7 @@
 ```
 
 添加后的整体依赖如下
+
 ```xml
 <dependencies>
     <dependency>
@@ -70,8 +80,11 @@
     </dependency>
 </dependencies>
 ```
+
 #### 编码(发送方)
+
 #### 配置
+
 ```yaml
 spring:
   rabbitmq:
@@ -80,10 +93,13 @@ spring:
     username: admin
     password: admin
 ```
+
 ##### 定义队列
+
 定义一个测试队列 TestDeadQueue，并为该队列配置死信队列，
 配置的方法就是在声明队列的时候，添加参数 `x-dead-letter-exchange` 及 `x-dead-letter-routing-key`，
 其实就是在消费失败时，将消息使用该 exchange 及 routing 发送至指定队列
+
 ```java
 @Configuration
 public class DeadConfig {
@@ -125,6 +141,7 @@ public class DeadConfig {
 ```
 
 ##### 测试发送
+
 ```java
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
@@ -149,8 +166,11 @@ public class MqTest {
 ```
 
 #### 编码(消费方)
+
 ##### 配置
+
 配置消费消息使用手动确认模式
+
 ```yaml
 spring:
   rabbitmq:
@@ -163,7 +183,9 @@ spring:
       simple:
         acknowledge-mode: manual
 ```
+
 ##### 定义队列
+
 ```java
 @Configuration
 public class Config {
@@ -185,6 +207,7 @@ public class Config {
 ```
 
 ##### 消费
+
 定义队列 TestDirectQueue 的消费方法，在方法中调用了 basicReject 方法，用于告诉 RabbitMQ 消费失败，
 调用 basicReject 方法时 requeue 参数必须为 false，不然就会把消息重新加入当前队列，
 由于队列 TestDirectQueue 配置了死信队列，于是 RabbitMQ 在接收到消费失败的 ACK 后，
@@ -223,13 +246,16 @@ public class ConsumerWithAck {
 ```
 
 ### 源码地址
-本章源码 : <https://gitee.com/gongm_24/spring-boot-tutorial.git>
+
+本章源码 : [https://github.com/lizhengdan/spring-boot-tutorial.git](https://github.com/lizhengdan/spring-boot-tutorial.git)
 
 ### 结束语
+
 死信队列其实并没有什么神秘的地方，不过是绑定在死信交换机上的普通队列，而死信交换机也只是一个普通的交换机，不过是用来专门处理死信的交换机。
 
 总结一下死信消息的生命周期：
-```mermaid 
+
+```mermaid
 flowchat
 st=>start: 客户端发送消息
 e=>end: 结束
