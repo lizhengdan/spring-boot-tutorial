@@ -1,11 +1,15 @@
 快速构建Web应用
----
+---------------
 
 ### 目标
 
 使用 SpringBoot 完成一个简单的 Web 应用程序开发，初步体验 SpringBoot 快速、简洁的特性。
 
 ### 操作步骤
+
+#### IntelliJ IDEA安装
+
+[http://www.jetbrains.com/idea/](http://www.jetbrains.com/idea/)
 
 #### 构建项目
 
@@ -19,9 +23,9 @@
 
 ##### 项目目录结构
 
- - src/main/java 存放项目源码
- - src/main/resources 存放项目配置文件
- - src/test/java 存放测试用例
+- src/main/java 存放项目源码
+- src/main/resources 存放项目配置文件
+- src/test/java 存放测试用例
 
 #### 添加依赖
 
@@ -66,7 +70,6 @@ public class HelloSpringBootController {
 @RestController 相当于在 HelloSpringBootController 类上添加 @Controller 注解，以及对类中每一个方法添加 @ResponseBody 注解。
 @GetMapping 相当于在 hello 方法上添加 `@RequestMapping(method = RequestMethod.GET)` 注解。
 
-
 2. 编写项目启动类
 
 创建 Application 类，内容如下
@@ -96,7 +99,7 @@ SpringBoot 还提供了其它启动方式，并且可以设置启动参数及配
 
 ### 代码地址
 
-本章源码 : <https://gitee.com/gongm_24/spring-boot-tutorial.git>
+本章源码 : [https://github.com/lizhengdan/spring-boot-tutorial.git](https://github.com/lizhengdan/spring-boot-tutorial.git)
 
 ### 结束语
 
@@ -128,4 +131,3 @@ SpringBoot 还提供了其它启动方式，并且可以设置启动参数及配
 ```
 java -jar chapter1-1.0.0-SNAPSHOT.jar
 ```
-
